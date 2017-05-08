@@ -1,0 +1,191 @@
+
+const expect = require('chai').expect
+const assert = require('chai').assert
+const sinon = require('sinon')
+const jsdom = require('jsdom')
+const { JSDOM } = jsdom
+const dom = new JSDOM('<!DOCTYPE html><div class="editor"></div>')
+const $ = require('jquery')(dom.window)
+const _ = require('underscore')
+const Backbone = require('backbone')
+Backbone.$ = $
+
+const EditBufferMediator = require('../../../../EditBuffer/EditBufferMediator')
+const WidgetFactory = require('../../../../Editor/Widget/WidgetFactory')
+const WidgetManager = require('../../../../Editor/Widget/WidgetManager')
+const WidgetStore = require('../../../../Editor/Widget/WidgetStore')
+const WidgetViewFactory = require('../../../../Editor/Widget/WidgetViewFactory')
+
+var editBufferMediatorMock, widgetStoreMock, viewFactoryMock, widgetFactoryMock
+
+function createWidgetManager(sourceContext, targetContext, viewMode) {
+
+  if (!sourceContext) {
+    sourceContext = 'sourcecontext'
+  }
+
+  if (!targetContext) {
+    targetContext = 'targetcontext'
+  }
+
+  if (!viewMode) {
+    viewMode = 'editor'
+  }
+
+  editBufferMediatorMock = sinon.createStubInstance(EditBufferMediator)
+  widgetFactoryMock = sinon.createStubInstance(WidgetFactory)
+  widgetStoreMock = sinon.createStubInstance(WidgetStore)
+  viewFactoryMock = sinon.createStubInstance(WidgetViewFactory)
+
+  widgetFactoryMock.sourceContext = sourceContext
+  widgetFactoryMock.targetContext = targetContext
+  widgetFactoryMock.create = function(widget, id, $el) {
+    var model = new Backbone.Model({
+      id: id,
+    })
+    model.editBufferItemRef = {
+      sourceContext: new Backbone.Model({id: widgetFactoryMock.sourceContext}),
+      targetContext: new Backbone.Model({id: widgetFactoryMock.targetContext}),
+    }
+    model.edit = sinon.stub()
+    model.duplicate = sinon.stub()
+    model.destroy = sinon.stub()
+    model.setState = sinon.stub()
+    widgetFactoryMock.model = model
+    return model
+  }
+
+  viewFactoryMock.currentViewmode = viewMode
+  viewFactoryMock.views = {}
+  viewFactoryMock.create = function(model, $el, viewmode) {
+    var view = new Backbone.View({
+      model: model,
+      el: $el[0],
+    })
+    view.save = sinon.stub()
+    view.render = sinon.stub().returns(view)
+    view.viewmode = viewmode
+
+    if (viewmode == 'editor') {
+      view.isEditorViewRendered = function() {
+        return viewFactoryMock.currentViewmode == 'editor'
+      }
+    }
+    viewFactoryMock.views[viewmode] = view
+    return view
+  }
+  viewFactoryMock.createTemporary = function(model, $el, viewmode) {
+    return this.create(model, $el, viewmode)
+  }
+
+  return new WidgetManager(
+    widgetFactoryMock,
+    viewFactoryMock,
+    widgetStoreMock,
+    editBufferMediatorMock
+  )
+}
+
+describe('WidgetManager module', () => {
+  describe('"insert"', () => {
+    it('should allow clients to trigger widget insertions', function() {
+      var widgetManager = createWidgetManager()
+      var $el = $('<div></div>')
+      editBufferMediatorMock.requestBufferItem = sinon.stub()
+      widgetManager.insert($el, 'testbundle')
+      assert(editBufferMediatorMock.requestBufferItem.withArgs('testbundle', $el).calledOnce, 'buffer item request not dispatched')
+    });
+  });
+  describe('"track"', () => {
+    it('should allow clients to track inserted widgets', function() {
+
+      // Test new widget added.
+      var widgetManager = createWidgetManager('context1', 'context1')
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      expect(_.size(viewFactoryMock.views)).to.eql(1)
+      assert(viewFactoryMock.views['editor'].save.calledOnce, 'save not called on editor viewmode')
+      assert(viewFactoryMock.views['editor'].render.calledOnce, 'render not called on editor viewmode')
+      assert(widgetFactoryMock.model.duplicate.notCalled, 'unexpected duplicate call')
+
+      // Test new widget added referencing same buffer item.
+      widgetManager = createWidgetManager('context1', 'context1')
+      widgetStoreMock.count.returns(2)
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      assert(viewFactoryMock.views['editor'].render.notCalled, 'render called when duplicate expected')
+      assert(widgetFactoryMock.model.duplicate.calledOnce, 'item not duplicated')
+
+      // Test new widget added in data mode.
+      widgetManager = createWidgetManager('context1', 'context1', 'export')
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      expect(_.size(viewFactoryMock.views)).to.eql(2)
+      assert(viewFactoryMock.views['export'].save.calledOnce, 'save not called on export viewmode')
+      assert(viewFactoryMock.views['editor'].render.calledOnce, 'render not called on export viewmode')
+
+      // Test new widget added in different context than referenced item.
+      var widgetManager = createWidgetManager('context1', 'context2')
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      assert(viewFactoryMock.views['editor'].render.notCalled, 'render called when duplicate expected (2)')
+      assert(widgetFactoryMock.model.duplicate.calledOnce, 'item not duplicated (2)')
+    });
+  });
+  describe('"get"', () => {
+    it('should allow clients get tracked widgets', function() {
+      var widgetManager = createWidgetManager()
+      widgetStoreMock.get.withArgs('test').returns({model: 'testresult'})
+      expect(widgetManager.get('test')).to.eql('testresult')
+    });
+  });
+  describe('"edit"', () => {
+    it('should allow clients to edit tracked widgets', function() {
+      var widgetManager = createWidgetManager()
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      widgetManager.get = sinon.stub().withArgs(1).returns(widgetFactoryMock.model)
+      widgetManager.edit(1)
+      assert(widgetFactoryMock.model.edit.calledOnce, 'edit command not dispatched')
+
+      widgetFactoryMock.model.edit.reset()
+      widgetManager.get = sinon.stub().returns(null)
+      widgetManager.edit(2)
+      assert(widgetFactoryMock.model.edit.notCalled, 'edit command dispatched on null model')
+    });
+  });
+  describe('"save"', () => {
+    it('should allow clients to save edits to tracked widgets', function() {
+      var widgetManager = createWidgetManager()
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      widgetManager.get = sinon.stub().withArgs(1).returns(widgetFactoryMock.model)
+      widgetManager.save(1, $('<div></div>'))
+      assert(viewFactoryMock.views['editor'].render.notCalled, 'render called on editor viewmode')
+      assert(viewFactoryMock.views['editor'].save.calledOnce, 'editor did not save editor state')
+      assert(viewFactoryMock.views['export'].render.calledOnce, 'render not called on export viewmode')
+      assert(viewFactoryMock.views['export'].save.calledOnce, 'editor did not save export state')
+    });
+  });
+  describe('"destroy"', () => {
+    it('should allow clients to destroy the object', function() {
+      var widgetManager = createWidgetManager()
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      widgetManager.get = sinon.stub().withArgs(1).returns(widgetFactoryMock.model)
+      widgetManager.destroy(1)
+      assert(widgetFactoryMock.model.destroy.calledOnce, 'model not destroyed')
+      assert(widgetFactoryMock.model.setState.notCalled, 'state erroneously updated')
+
+      widgetManager = createWidgetManager()
+      widgetManager.track({widgetid: 1}, 1, $('<div></div>'))
+      widgetManager.get = sinon.stub().withArgs(1).returns(widgetFactoryMock.model)
+      widgetManager.destroy(1, true)
+      assert(widgetFactoryMock.model.destroy.calledOnce, 'model not destroyed (2)')
+      assert(widgetFactoryMock.model.setState.calledOnce, 'state not updated')
+    })
+  })
+  describe('"cleanup"', () => {
+    it('should allow clients to destroy the object', function() {
+      var widgetManager = createWidgetManager()
+      widgetStoreMock.cleanup = sinon.spy()
+      editBufferMediatorMock.cleanup = sinon.spy()
+      widgetManager.cleanup()
+      assert(widgetStoreMock.cleanup.calledOnce, 'widget store not destroyed')
+      assert(editBufferMediatorMock.cleanup.calledOnce, 'edit buffer mediator not destroyed')
+    });
+  });
+});
