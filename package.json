@@ -21,6 +21,7 @@
   "homepage": "https://github.com/christophersmith262/widget-sync#readme",
   "devDependencies": {
     "chai": "^3.5.0",
+    "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "jquery": "^3.2.1",
     "jsdom": "^10.1.0",
