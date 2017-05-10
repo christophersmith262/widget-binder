@@ -45,7 +45,9 @@ _.extend(module.exports.prototype, {
    * @param {SyncActionResolver} resolver
    *   The resolver service that will be used to resolve the command.
    */
-  send: function(type, data, settings, resolver) {}
+  send: function(type, data, settings, resolver) {
+    throw new Error('Unimplemented method.');
+  }
 
 });
 

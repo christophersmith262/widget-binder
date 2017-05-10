@@ -5,8 +5,7 @@
 
 'use strict';
 
-var _ = require('underscore'),
-  $ = require('backbone').$;
+var _ = require('underscore');
 
 /**
  */
@@ -208,44 +207,20 @@ _.extend(module.exports.prototype, {
     var prototype = this._globalSettings.servicePrototypes[name];
     switch (args.length) {
       case 0:
-        return new prototype()
+        return new prototype();
       case 1:
-        return new prototype(args[0])
+        return new prototype(args[0]);
       case 2:
-        return new prototype(args[0], args[1])
+        return new prototype(args[0], args[1]);
       case 3:
-        return new prototype(args[0], args[1], args[2])
+        return new prototype(args[0], args[1], args[2]);
       case 4:
-        return new prototype(args[0], args[1], args[2], args[3])
+        return new prototype(args[0], args[1], args[2], args[3]);
       case 5:
-        return new prototype(args[0], args[1], args[2], args[3], args[4])
+        return new prototype(args[0], args[1], args[2], args[3], args[4]);
       default:
-        throw new Error('Really, you need to inject more than five services? Consider factoring ' + name + ' into separate classes.')
+        throw new Error('Really, you need to inject more than five services? Consider factoring ' + name + ' into separate classes.');
     }
   }
 
 });
-
-module.exports.createConfig = function() {
-
-  this.registerService = function(name, prototype) {
-  }
-
-  this.registerView = function(viewmode, def) {
-  }
-
-  this.registerElement = function(name, defintion) {
-  }
-
-  this.setViewOptions = function(viewmode, options) {
-  }
-
-  this.setViewOption = function(viewmode, options) {
-  }
-
-  this.setPlugin = function(type, instance) {
-  }
-
-  this.setInitialData = function(data) {
-  }
-}
