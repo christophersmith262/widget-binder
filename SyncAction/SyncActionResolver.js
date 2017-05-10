@@ -27,18 +27,6 @@ _.extend(module.exports.prototype, {
         this._updateModels(response[modelName], this._collections[modelName]);
       }
     }
-
-    if (response.editBufferItem) {
-      this._updateModels(response.editBufferItem, function(attributes) {
-        return resolver._contextCollection.get(attributes.contextId).editBuffer;
-      });
-    }
-
-    if (response.widget) {
-      this._updateModels(response.widget, function(attributes) {
-        return resolver.editorCollection.get(attributes.contextId).widgetStore;
-      });
-    }
   },
 
   /**
@@ -49,7 +37,7 @@ _.extend(module.exports.prototype, {
       if (typeof collection == 'function') {
         resolvedCollection = collection(attributes);
       }
-      var existing = resolvedCollection(attributes).get(id);
+      var existing = resolvedCollection.get(id);
       if (existing) {
         existing.set(attributes);
       }

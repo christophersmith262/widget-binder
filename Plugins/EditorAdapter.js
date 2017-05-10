@@ -17,31 +17,25 @@ _.extend(module.exports.prototype, {
 
   /**
    */
-  insertBufferItem: function(bufferItemModel) {},
+  insertEmbedCode: function(embedCode) {},
+
+  destroyWidget: function(id) {
+  },
 
   /**
    */
-  getBufferItem: function(editBuffer, editorWidget) {},
+  attachInlineEditing: function(needsHelp) {},
 
   /**
    */
-  getWidget: function(bufferItemModel, editorWidget) {},
+  getInlineEdit: function(needsHelp) {},
 
-  /**
-   */
-  getWidgetEl: function(editorWidget) {},
+  getRootEl: function() {
+  },
 
-  /**
-   */
-  destroyWidget: function(widgetModel) {},
+  cleanup: function() {
+  }
 
-  /**
-   */
-  getRootEl: function() {},
-
-  /**
-   */
-  widgetExists: function(widgetModel) {}
 });
 
 module.exports.extend = Backbone.Model.extend;

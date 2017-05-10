@@ -77,13 +77,14 @@ _.extend(module.exports.prototype, {
       throw new Error('Invalid view mode "' + viewMode + '"');
     }
 
-    return new def.prototype({
+    var options = def.options ? def.options : {};
+
+    return new def.prototype(_.extend({
       model: widgetModel,
       adapter: this._adapter,
       elementFactory: this._elementFactory,
       el: $el.get(0),
-      template: def.template,
-    });
+    }, options));
   },
 
   /**

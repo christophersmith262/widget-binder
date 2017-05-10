@@ -35,7 +35,7 @@ _.extend(module.exports.prototype, {
     if (!template) {
       throw new Error('Invalid element type.');
     }
-    return new Element(template.tag, template.attributes, data);
+    return new Element(template.tag, template.attributes, template.selector, data);
   }
 
 });

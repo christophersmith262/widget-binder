@@ -9,7 +9,7 @@ var _ = require('underscore');
 
 /**
  */
-module.exports = function(tag, attributeMap, data) {
+module.exports = function(tag, attributeMap, selector, data) {
   var element = this;
 
   if (!attributeMap) {
@@ -18,6 +18,7 @@ module.exports = function(tag, attributeMap, data) {
 
   this._tag = tag;
   this._attributeMap = attributeMap;
+  this._selector = selector;
   this._invertedAttributeMap = {};
   _.each(attributeMap, function(attribute_value, attribute_name) {
     element._invertedAttributeMap[element._getDataKey(attribute_value)] = attribute_name;
@@ -67,6 +68,7 @@ _.extend(module.exports.prototype, {
    */
   setAttribute: function(name, value) {
     this._attributes[this.getAttributeName(name)] = value;
+    return this;
   },
 
   /**
@@ -83,6 +85,46 @@ _.extend(module.exports.prototype, {
       name = this._invertedAttributeMap[dataKey];
     }
     return name;
+  },
+
+  /**
+   */
+  renderOpeningTag: function() {
+    var result = '<' + this.getTag();
+
+    _.each(this.getAttributes(), function(value, name) {
+      result += ' ' + name + '="' + value + '"';
+    });
+
+    return result + '>';
+  },
+
+  /**
+   */
+  renderClosingTag: function() {
+    return '</' + this.getTag() + '>';
+  },
+
+  /**
+   */
+  getSelector: function() {
+    var attributes = this.getAttributes();
+    var selector = '';
+
+    if (this._selector) {
+      selector = this._selector;
+    }
+    else if (attributes['class']) {
+      var classes = attributes['class'].split(' ');
+      _.each(classes, function(classname) {
+        selector += '.' + classname;
+      }, this);
+    }
+    else {
+      selector = this.getTag();
+    }
+
+    return selector;
   },
 
   /**

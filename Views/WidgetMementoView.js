@@ -5,7 +5,8 @@
 
 'use strict';
 
-var Backbone = require('backbone'),
+var _ = require('underscore'),
+  Backbone = require('backbone'),
   $ = Backbone.$;
 
 module.exports = Backbone.View.extend({
@@ -16,11 +17,19 @@ module.exports = Backbone.View.extend({
   initialize: function(options) {
     this.adapter = options.adapter;
     this.elementFactory = options.elementFactory;
-    this.fieldTemplate = this.elementFactory.getTemplate('field');
-    this.contextAttribute = this.elementFactory.getContextAttribute();
-    this.inlineEditorSelector =  this.fieldTemplate.getTag() + '[' + this.contextAttribute + ']';
-    this.attributeWhitelist = _.invert(this.fieldTemplate.getAttributes());
     this.template = options.template;
+
+    // Get a list of templates that will be used.
+    var widgetTemplate = this.elementFactory.getTemplate('widget');
+    var fieldTemplate = this.elementFactory.getTemplate('field');
+
+    // Set up attribute / element selectors.
+    this.inlineContextAttribute = fieldTemplate.getAttributeName('<context>');
+    this.inlineEditorSelector = fieldTemplate.getSelector();
+
+    // Filter out non-configured attributes.
+    this.attributeWhitelist = _.invert(widgetTemplate.getAttributeNames());
+    delete this.attributeWhitelist[widgetTemplate.getAttributeName('<viewmode>')];
   },
 
   /**
@@ -32,11 +41,11 @@ module.exports = Backbone.View.extend({
    */
   render: function() {
     var view = this;
-    var fields = this.model.embedCode.getBufferItem().get('fields');
+    var fields = this.model.editBufferItemRef.editBufferItem.get('fields');
     var edits = this.model.get('edits');
     this.$el.html(this.template(this.elementFactory, fields, edits));
     _.each(this.el.attributes, function(attr) {
-      if (!view.attributeWhitelist[attr.name]) {
+      if (_.isUndefined(view.attributeWhitelist[attr.name])) {
         view.$el.removeAttr(attr.name);
       }
     });
@@ -49,7 +58,7 @@ module.exports = Backbone.View.extend({
     var edits = {};
     var view = this;
     this.$el.find(this.inlineEditorSelector).each(function() {
-      var contextString = $(this).attr(view.contextAttribute);
+      var contextString = $(this).attr(view.inlineContextAttribute);
       edits[contextString] = $(this).html();
     });
     this.model.set({edits: edits}, {silent: true});

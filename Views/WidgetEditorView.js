@@ -5,7 +5,8 @@
 
 'use strict';
 
-var Backbone = require('backbone'),
+var _ = require('underscore'),
+  Backbone = require('backbone'),
   $ = Backbone.$;
 
 /**
@@ -17,18 +18,29 @@ var Backbone = require('backbone'),
  */
 module.exports = Backbone.View.extend({
 
-  commandSelector: '.widget-sync-command',
-
   /**
    * {@inheritdoc}
    */
   initialize: function(options) {
     this.adapter = options.adapter;
     this._elementFactory = options.elementFactory;
-    this.contextAttribute = this.elementFactory.getContextAttribute();
-    this.inlineEditorSelector = '.widget-sync-' + this.elementFactory.getTemplate('field').getTag();
-    this.listenTo(this.model, 'change', this._changeHandler);
     this.template = options.template;
+
+    // Get a list of templates that will be used.
+    var widgetTemplate = this._elementFactory.getTemplate('widget');
+    var fieldTemplate = this._elementFactory.getTemplate('field');
+    var widgetCommandTemplate = this._elementFactory.getTemplate('widget-command');
+
+    // Set up attribute / element selectors.
+    this.widgetSelector = widgetTemplate.getSelector();
+    this.viewModeAttribute = widgetTemplate.getAttributeName('<viewmode>');
+    this.inlineContextAttribute = fieldTemplate.getAttributeName('<context>');
+    this.commandSelector = widgetCommandTemplate.getSelector();
+    this.commandAttribute = widgetCommandTemplate.getAttributeName('<command>');
+    this.inlineEditorSelector = fieldTemplate.getSelector();
+
+    // Set up the change handler.
+    this.listenTo(this.model, 'change', this._changeHandler);
   },
 
   /**
@@ -45,26 +57,38 @@ module.exports = Backbone.View.extend({
     else {
       var view = this;
       this.$el.html(this.template(this._elementFactory, this.model.get('markup')));
-      this.$el.find(this.commandSelector + '--edit').on('click', function() {
-        view.save().edit();
+
+      this.$el.find(this.commandSelector).on('click', function() {
+        var command = $(this).attr(view.commandAttribute);
+
+        if (command == 'edit') {
+          view.save().edit();
+        }
+        else if (command == 'remove') {
+          view.remove();
+        }
       });
-      this.$el.find(this.commandSelector + '--remove').on('click', function() {
-        view.remove();
-      });
+
       this.renderAttributes();
       this.renderEdits();
     }
+
     return this;
   },
 
   /**
    */
   renderAttributes: function() {
-    var element = this._elementFactory.create('widget', this.model);
-    element.setAttribute(this.model.embedCode.viewModeAttribute, 'editor');
-    for (var attributeName in element.getAttributes()) {
-      this.$el.attr(attributeName, element.getAattributes());
-    }
+    var element = this._elementFactory.create('widget', {
+      context: this.model.get('contextId'),
+      uuid: this.model.get('itemId'),
+      viewmode: 'editor',
+    });
+
+    _.each(element.getAttributes(), function(value, name) {
+      this.$el.attr(name, value);
+    }, this);
+
     return this;
   },
 
@@ -140,7 +164,7 @@ module.exports = Backbone.View.extend({
   /**
    */
   isEditorViewRendered: function() {
-    return this.$el.attr(this.model.embedCode.viewModeAttribute) == 'editor';
+    return this.$el.attr(this.viewModeAttribute) == 'editor';
   },
 
   /**
@@ -179,9 +203,9 @@ module.exports = Backbone.View.extend({
   _inlineElementVisitor(callback) {
     var view = this;
     this.$el.find(this.inlineEditorSelector).each(function() {
-      if ($(this).closest(view.model.embedCodeFactory.getTag()).is(view.$el)) {
-        var contextString = $(this).attr(view.contextAttribute);
-        var selector = view.inlineEditorSelector + '[' + view.contextAttribute + '="' + contextString + '"]';
+      if ($(this).closest(view.widgetSelector).is(view.$el)) {
+        var contextString = $(this).attr(view.inlineContextAttribute);
+        var selector = view.inlineEditorSelector + '[' + view.inlineContextAttribute + '="' + contextString + '"]';
         callback.call(view, $(this), contextString, selector);
       }
     });
