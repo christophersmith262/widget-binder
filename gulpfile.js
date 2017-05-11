@@ -12,5 +12,8 @@ gulp.task('lint', () => {
 });
 
 gulp.task('test', () => {
-  child_process.spawn('istanbul', ['cover', '_mocha', '--', '--recursive', '-G'], {stdio:'inherit'});
+  child_process.spawn('istanbul', ['cover', '_mocha', '--', '--recursive', '-G'], {stdio:'inherit'})
+    .on('close', function(code) {
+      process.exit(code);
+    });
 });

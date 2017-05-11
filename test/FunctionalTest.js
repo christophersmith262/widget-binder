@@ -119,6 +119,7 @@ const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
 
 process.on('uncaughtException', function(err) {
   console.log(err);
+  process.exit(1);
 });
 
 function test() {
