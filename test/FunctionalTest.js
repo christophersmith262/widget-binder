@@ -1,4 +1,4 @@
-
+/*
 'use strict';
 
 const expect = require('chai').expect;
@@ -15,12 +15,12 @@ config.includeStack = true;
 
 const WidgetSync = require('../');
 
-var watcher;
+var watcher;*/
 
 /**
  * Simulates an editor integration.
  */
-const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
+/*const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
 
   constructor: function() {
     this.nextId = 1;
@@ -53,12 +53,12 @@ const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
     return $('.editor')[0];
   }
 
-});
+});*/
 
 /**
  * Simulates a server integration.
  */
-const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
+/*const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
 
   types: {
     tabs: {
@@ -134,7 +134,7 @@ function test() {
     watcher.widgetManager.insert($('.editor'), 'bundle1');
 }
 
-test();
+test();*/
 
 /*describe('Functional Test', () => {
   it('should be creatable', function() {

@@ -4,3 +4,4 @@ node_js:
 before_script:
   - npm install -g gulp mocha istanbul
 script: gulp test
+after_success: 'npm run coveralls'
