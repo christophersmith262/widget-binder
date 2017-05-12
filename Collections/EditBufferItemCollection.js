@@ -6,7 +6,7 @@
 'use strict';
 
 var Backbone = require('backbone'),
-  EditBufferItemModel = require('../models/EditBufferItemModel');
+  EditBufferItemModel = require('../Models/EditBufferItemModel');
 
 /**
  */
