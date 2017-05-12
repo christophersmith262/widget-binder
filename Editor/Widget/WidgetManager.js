@@ -6,7 +6,7 @@
 'use strict';
 
 var _ = require('underscore'),
-  WidgetModel = require('../../models/WidgetModel');
+  WidgetModel = require('../../Models/WidgetModel');
 
 /**
  * Creates a WidgetManager object.

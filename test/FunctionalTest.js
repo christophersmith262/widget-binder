@@ -1,4 +1,4 @@
-/*
+
 'use strict';
 
 const expect = require('chai').expect;
@@ -15,50 +15,87 @@ config.includeStack = true;
 
 const WidgetSync = require('../');
 
-var watcher;*/
+var watcher;
+
+const Editor = function($el) {
+  this.$el = $el;
+  this.makeEditable($el);
+  this.setSelectedElement($el);
+}
+
+Editor.prototype = {
+
+  getEditorEl: function() {
+    return this.$el;
+  },
+
+  makeEditable: function($el) {
+    $el.attr('content-editable', true);
+  },
+
+  isEditable: function($el) {
+    return !!$el.attr('content-editable');
+  },
+
+  edit: function($el, edit) {
+    $el.html(edit);
+  },
+
+  getSelectedElement: function() {
+    return this.$selected;
+  },
+
+  setSelectedElement: function($el) {
+    if (!this.isEditable($el)) {
+      throw new Error('Cannot select a non-editable region');
+    }
+    this.$selected = $el;
+  }
+}
 
 /**
  * Simulates an editor integration.
  */
-/*const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
+const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
 
-  constructor: function() {
+  constructor: function(editor) {
+    this.editor = editor;
     this.nextId = 1;
     this.widgets = {};
   },
 
   insertEmbedCode: function(embedCode) {
     var $widget = $(embedCode.renderOpeningTag() + embedCode.renderClosingTag());
-    $('.editor').append($widget);
+    this.editor.getSelectedElement().append($widget);
     var widget = {
       id: this.nextId++,
     };
     this.widgets[widget.id] = widget;
-
     watcher.widgetManager.track(widget, widget.id, $widget);
-    var $exportContainer = $('<div></div>');
-    $widget = $widget.clone();
-    $exportContainer.append($widget);
-    watcher.widgetManager.save(1, $widget);
+  },
 
-    console.log($('.editor').html());
-    console.log($exportContainer.html());
+  attachInlineEditing: function(widgetView, contextId, selector) {
+    this.editor.makeEditable(widgetView.$el.find(selector));
   },
 
   getInlineEdit: function(widgetView, contextId, selector) {
-    return 'test';
+    return widgetView.$el.find(selector).html();
   },
 
   getRootEl: function() {
-    return $('.editor')[0];
+    return this.editor.getEditorEl()[0];
+  },
+
+  destroyWidget: function(id) {
+    delete this.widgets[id];
   }
 
-});*/
+});
 
 /**
  * Simulates a server integration.
  */
-/*const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
+const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
 
   types: {
     tabs: {
@@ -123,9 +160,11 @@ process.on('uncaughtException', function(err) {
 });
 
 function test() {
+    var editor = new Editor($('.editor'));
+
     var widgetSync = new WidgetSync({
       plugins: {
-        adapter: new TestAdapter(),
+        adapter: new TestAdapter(editor),
         protocol: new TestProtocol(),
       },
     });
@@ -134,7 +173,7 @@ function test() {
     watcher.widgetManager.insert($('.editor'), 'bundle1');
 }
 
-test();*/
+test();
 
 /*describe('Functional Test', () => {
   it('should be creatable', function() {
