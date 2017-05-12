@@ -6,6 +6,7 @@ module.exports = {
   name: 'default',
 
   servicePrototypes: {
+    'Binder': require('./Binder'),
     'CommandEmitter': require('./Editor/Command/CommandEmitter'),
     'ContextCollection': require('./Collections/ContextCollection'),
     'ContextListener': require('./Context/ContextListener'),
@@ -18,7 +19,6 @@ module.exports = {
     'SyncActionDispatcher': require('./SyncAction/SyncActionDispatcher'),
     'SyncActionResolver': require('./SyncAction/SyncActionResolver'),
     'WidgetFactory': require('./Editor/Widget/WidgetFactory'),
-    'WidgetManager': require('./Editor/Widget/WidgetManager'),
     'WidgetStore': require('./Editor/Widget/WidgetStore'),
     'WidgetViewFactory': require('./Editor/Widget/WidgetViewFactory'),
     'EditorView': require('./Views/EditorView'),
@@ -45,18 +45,13 @@ module.exports = {
   },
 
   elements: {
-    'editor': {
-      attributes: {
-        'data-context': '<context>',
-      },
-    },
     'widget': {
       tag: 'div',
       attributes: {
         'data-uuid': '<uuid>',
         'data-context-hint': '<context>',
         'data-viewmode': '<viewmode>',
-        'class': 'widget-sync-widget'
+        'class': 'widget-binder-widget'
       }
     },
     'field': {
@@ -65,31 +60,31 @@ module.exports = {
         'data-field-name': '<field>',
         'data-context': '<context>',
         'data-mutable': '<editable>',
-        'class': 'widget-sync-field'
+        'class': 'widget-binder-field'
       }
     },
     'widget-display': {
       tag: 'div',
       attributes: {
-        'class': 'widget-sync-widget__display',
+        'class': 'widget-binder-widget__display',
       }
     },
     'toolbar': {
       tag: 'ul',
       attributes: {
-        'class': 'widget-sync-toolbox',
+        'class': 'widget-binder-toolbox',
       }
     },
     'toolbar-item': {
       tag: 'li',
       attributes: {
-        'class': 'widget-sync-toolbox__item',
+        'class': 'widget-binder-toolbox__item',
       }
     },
     'widget-command': {
       tag: 'a',
       attributes: {
-        'class': 'widget-sync-command',
+        'class': 'widget-binder-command',
         'data-command': '<command>',
         'href': '#',
       }

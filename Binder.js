@@ -1,34 +1,14 @@
-/**
- * @file
- * Provides the public interface for managing the widget lifecycle.
- */
-
-'use strict';
-
 var _ = require('underscore'),
-  WidgetModel = require('../../Models/WidgetModel');
+  $ = require('jquery');
 
-/**
- * Creates a WidgetManager object.
- *
- * @param {WidgetFactory} widgetFactory
- *   The widget factory that will be used to create new widget models.
- * @param {WidgetViewFactory} viewFactory
- *   The widget view factory that will be used to create views for tracked
- *   widgets.
- * @param {WidgetStore} widgetStore
- *   The widget store that will be used to store all tracked data about a
- *   widget.
- * @param {EditBufferMediator} editBufferMediator
- *   A mediator object that will negotiate requests for new edit buffer items
- *   between the server and editor.
- */
-module.exports = function(widgetFactory, viewFactory, widgetStore, editBufferMediator) {
-  this._widgetFactory = widgetFactory;
-  this._viewFactory = viewFactory;
-  this._widgetStore = widgetStore;
-  this._editBufferMediator = editBufferMediator;
-};
+module.exports = function(editorModel) {
+  this._editorModel = editorModel;
+  this._widgetFactory = editorModel.widgetFactory;
+  this._viewFactory = editorModel.viewFactory;
+  this._widgetStore = editorModel.widgetStore;
+  this._editBufferMediator = editorModel.editBufferMediator;
+  this._editBufferMediator = editorModel.editBufferMediator;
+}
 
 _.extend(module.exports.prototype, {
 
@@ -40,7 +20,7 @@ _.extend(module.exports.prototype, {
    * @param {string} bundleName
    *   The type of item to request.
    */
-  insert: function($targetEl, bundleName) {
+  create: function($targetEl, bundleName) {
     this._editBufferMediator.requestBufferItem(bundleName, $targetEl);
   },
 
@@ -63,7 +43,7 @@ _.extend(module.exports.prototype, {
    * @param {jQuery} $targetEl
    *   The root element of the widget within the editor.
    */
-  track: function(widget, id, $targetEl) {
+  bind: function(widget, id, $targetEl) {
     // Create a model for representing the widget.
     var widgetModel = this._widgetFactory.create(widget, id, $targetEl);
     var targetContext = widgetModel.editBufferItemRef.targetContext;
@@ -98,6 +78,12 @@ _.extend(module.exports.prototype, {
     else {
       widgetEditorView.render();
     }
+  },
+
+  unbind: function(id) {
+    this._applyToModel(id, function(widgetModel) {
+      this._widgetStore.remove(widgetModel, true);
+    });
   },
 
   /**
@@ -175,7 +161,8 @@ _.extend(module.exports.prototype, {
   /**
    * Cleans up after the widget manager object.
    */
-  cleanup: function() {
+  close: function() {
+    this._editorModel.destroy();
     this._widgetStore.cleanup();
     this._editBufferMediator.cleanup();
   },

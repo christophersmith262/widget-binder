@@ -13,9 +13,9 @@ Backbone.$ = $;
 
 config.includeStack = true;
 
-const WidgetSync = require('../');
+const WidgetBinder = require('../');
 
-var watcher;
+var binder;
 
 const Editor = function($el) {
   this.$el = $el;
@@ -56,7 +56,7 @@ Editor.prototype = {
 /**
  * Simulates an editor integration.
  */
-const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
+const TestAdapter = WidgetBinder.PluginInterface.EditorAdapter.extend({
 
   constructor: function(editor) {
     this.editor = editor;
@@ -71,7 +71,7 @@ const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
       id: this.nextId++,
     };
     this.widgets[widget.id] = widget;
-    watcher.widgetManager.track(widget, widget.id, $widget);
+    binder.bind(widget, widget.id, $widget);
   },
 
   attachInlineEditing: function(widgetView, contextId, selector) {
@@ -95,7 +95,7 @@ const TestAdapter = WidgetSync.PluginInterface.EditorAdapter.extend({
 /**
  * Simulates a server integration.
  */
-const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
+const TestProtocol = WidgetBinder.PluginInterface.SyncProtocol.extend({
 
   types: {
     tabs: {
@@ -117,7 +117,7 @@ const TestProtocol = WidgetSync.PluginInterface.SyncProtocol.extend({
   },
 
   constructor: function() {
-    this.dataStore = new WidgetSync();
+    this.dataStore = new WidgetBinder();
     this.contexts = this.dataStore.getContexts();
     this.nextId = 1;
   },
@@ -162,15 +162,19 @@ process.on('uncaughtException', function(err) {
 function test() {
     var editor = new Editor($('.editor'));
 
-    var widgetSync = new WidgetSync({
+    var widgetBinder = new WidgetBinder({
       plugins: {
         adapter: new TestAdapter(editor),
         protocol: new TestProtocol(),
       },
     });
 
-    watcher = widgetSync.watch($('.editor'));
-    watcher.widgetManager.insert($('.editor'), 'bundle1');
+    binder = widgetBinder.open($('.editor'));
+    binder.create($('.editor'), 'bundle1');
+    console.log($('.editor').html());
+    binder.save(1, $('.widget-binder-widget'));
+    console.log($('.editor').html());
+    binder.close();
 }
 
 test();

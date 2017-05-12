@@ -1,7 +1,7 @@
 {
-  "name": "widget-sync",
+  "name": "widget-binder",
   "version": "1.0.0",
-  "description": "A library for edits from client side widgets to server side data models.",
+  "description": "A library for binding client side widgets to server side data entities.",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/christophersmith262/widget-sync.git"
+    "url": "git+ssh://git@github.com/christophersmith262/widget-binder.git"
   },
   "author": "Christopher Smith",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/christophersmith262/widget-sync/issues"
+    "url": "https://github.com/christophersmith262/widget-binder/issues"
   },
-  "homepage": "https://github.com/christophersmith262/widget-sync#readme",
+  "homepage": "https://github.com/christophersmith262/widget-binder#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.13.1",

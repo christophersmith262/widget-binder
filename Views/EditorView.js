@@ -26,13 +26,8 @@ module.exports = Backbone.View.extend({
   /**
    */
   render: function() {
-    var element = this._elementFactory.create('editor', {
-      context: this.model.get('context'),
-    });
-
-    _.each(element.getAttributes(), function(value, name) {
-      this.$el.attr(name, value);
-    }, this);
+    var template = this._elementFactory.getTemplate('field');
+    this.$el.attr(template.getAttributeName('<context>'), this.model.get('context'));
   },
 
 });

@@ -41,5 +41,9 @@ _.extend(module.exports.prototype, Backbone.Events, {
     else {
       this.trigger('updateItem', bufferItemModel);
     }
+  },
+
+  cleanup: function() {
+    this.stopListening();
   }
 });

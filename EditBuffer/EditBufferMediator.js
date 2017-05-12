@@ -30,6 +30,7 @@ _.extend(module.exports.prototype, Backbone.Events, {
   },
 
   cleanup: function() {
+    this._contextListener.cleanup();
     this.stopListening();
   },
 

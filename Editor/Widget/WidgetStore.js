@@ -175,7 +175,6 @@ _.extend(module.exports.prototype, Backbone.Events, {
     for (var i in this._views) {
       for (var j in this._views[i]) {
         this._views[i][j].remove();
-        delete this._views[i][j];
       }
       delete this._views[i];
     }

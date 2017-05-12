@@ -76,7 +76,7 @@ _.extend(module.exports.prototype, {
 
   /**
    */
-  watch: function($editorEl) {
+  open: function($editorEl) {
     var editorContext = this._createContextResolver().resolveTargetContext($editorEl);
     var editorContextId = editorContext ? editorContext.get('id') : null;
     var editorModel;
@@ -109,8 +109,11 @@ _.extend(module.exports.prototype, {
         editorModel = new this._globalSettings.servicePrototypes.EditorCollection.prototype.model({
           id: editorContextId,
         }, {
-          widgetManager: this._createService('WidgetManager', widgetFactory, this._viewFactory, widgetStore, editBufferMediator),
+          widgetFactory: widgetFactory,
+          viewFactory: this._viewFactory,
           widgetStore: widgetStore,
+          editBufferMediator: editBufferMediator,
+          context: editorContext,
         });
         this._createService('EditorView', {
           model: editorModel,
@@ -119,10 +122,13 @@ _.extend(module.exports.prototype, {
           elementFactory: this._elementFactory,
         });
         this._editorCollection.set(editorModel);
+
+        return this._createService('Binder', editorModel, editBufferMediator);
+      }
+      else {
+        throw new Error('Existing binder already open for this editor instance.');
       }
     }
-
-    return editorModel;
   },
 
   /**

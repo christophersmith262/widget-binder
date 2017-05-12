@@ -13,8 +13,10 @@ module.exports = Backbone.Model.extend({
    * {@inheritdoc}
    */
   initialize: function(attributes, config) {
-    this.widgetManager = config.widgetManager;
+    this.widgetFactory = config.widgetFactory;
+    this.viewFactory = config.viewFactory;
     this.widgetStore = config.widgetStore;
+    this.editBufferMediator = config.editBufferMediator;
     this.context = config.context;
     this.listenTo(this.context, 'change:id', this._updateContextId);
   },
@@ -24,5 +26,11 @@ module.exports = Backbone.Model.extend({
   _updateContextId: function(contextModel) {
     this.set({ id: contextModel.get('id') });
   },
+
+  destroy: function() {
+    this.stopListening();
+    this.widgetStore.cleanup();
+    this.editBufferMediator.cleanup();
+  }
 
 });
