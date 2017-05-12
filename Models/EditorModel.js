@@ -1,7 +1,7 @@
 
 'use strict';
 
-var Backbone = require('Backbone');
+var Backbone = require('backbone');
 
 /**
  */
