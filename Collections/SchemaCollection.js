@@ -6,7 +6,7 @@
 'use strict';
 
 var Backbone = require('backbone'),
-  SchemaModel = require('../models/SchemaModel');
+  SchemaModel = require('../Models/SchemaModel');
 
 /**
  */
