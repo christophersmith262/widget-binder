@@ -200,7 +200,7 @@ module.exports = Backbone.View.extend({
 
   /**
    */
-  _inlineElementVisitor(callback) {
+  _inlineElementVisitor: function(callback) {
     var view = this;
     this.$el.find(this.inlineEditorSelector).each(function() {
       if ($(this).closest(view.widgetSelector).is(view.$el)) {
