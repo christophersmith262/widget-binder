@@ -40,8 +40,8 @@ module.exports = {
   },
 
   plugins: {
-    adapter: null,
-    protocol: null,
+    adapter: {},
+    protocol: {},
   },
 
   elements: {

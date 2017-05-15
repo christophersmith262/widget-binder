@@ -40,12 +40,6 @@ _.extend(module.exports.prototype, {
 
   /**
    */
-  getViewFactory: function() {
-    return this._viewFactory;
-  },
-
-  /**
-   */
   getContexts: function() {
     return this._contextCollection;
   },
@@ -94,6 +88,16 @@ _.extend(module.exports.prototype, {
 
         // Create factories for generating models and views.
         var adapter = this._globalSettings.plugins.adapter;
+        if (typeof adapter.create == 'function') {
+          adapter = adapter.create.apply(adapter, arguments);
+        }
+
+        // Create a view factory for generating widget views.
+        var viewFactory = this._createService('WidgetViewFactory', this._elementFactory, adapter);
+        for (var type in this._globalSettings.views) {
+          viewFactory.register(type, this._globalSettings.views[type]);
+        }
+
         var uuidAttribute = this._elementFactory.getTemplate('widget').getAttributeName('<uuid>');
         var widgetFactory = this._createService('WidgetFactory', contextResolver, editBufferItemRefFactory, uuidAttribute);
 
@@ -110,7 +114,7 @@ _.extend(module.exports.prototype, {
           id: editorContextId,
         }, {
           widgetFactory: widgetFactory,
-          viewFactory: this._viewFactory,
+          viewFactory: viewFactory,
           widgetStore: widgetStore,
           editBufferMediator: editBufferMediator,
           context: editorContext,
@@ -136,10 +140,15 @@ _.extend(module.exports.prototype, {
   _initialize: function(config) {
     this._globalSettings = _.defaults(config, module.exports.defaults);
 
+    var protocol = this._globalSettings.plugins.protocol;
+    if (typeof protocol.create == 'function') {
+      protocol = protocol.create.apply(protocol, arguments);
+    }
+
     // Create the action dispatcher / resolution services for handling syncing
     // data with the server.
     this._syncActionResolver = this._createService('SyncActionResolver');
-    this._syncActionDispatcher = this._createService('SyncActionDispatcher', this._globalSettings.plugins.protocol, this._syncActionResolver);
+    this._syncActionDispatcher = this._createService('SyncActionDispatcher', protocol, this._syncActionResolver);
 
     // Create the top level collections that are shared across editor instances.
     var editorCollection = this._createService('EditorCollection');
@@ -165,12 +174,6 @@ _.extend(module.exports.prototype, {
 
     // Create an element factory to provide a generic way to create markup.
     this._elementFactory = this._createService('ElementFactory', this._globalSettings.elements);
-
-    // Create a view factory for generating widget views.
-    this._viewFactory = this._createService('WidgetViewFactory', this._elementFactory, this._globalSettings.plugins.adapter);
-    for (var type in this._globalSettings.views) {
-      this._viewFactory.register(type, this._globalSettings.views[type]);
-    }
 
     // Load any initial models.
     if (config.data) {
