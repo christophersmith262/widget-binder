@@ -71,6 +71,8 @@ _.extend(module.exports.prototype, {
   /**
    */
   open: function($editorEl) {
+    $editorEl.addClass('widget-binder-open');
+
     var editorContext = this._createContextResolver().resolveTargetContext($editorEl);
     var editorContextId = editorContext ? editorContext.get('id') : null;
     var editorModel;
@@ -119,7 +121,7 @@ _.extend(module.exports.prototype, {
           editBufferMediator: editBufferMediator,
           context: editorContext,
         });
-        this._createService('EditorView', {
+        var editorView = this._createService('EditorView', {
           model: editorModel,
           el: $editorEl[0],
         }, {
@@ -127,7 +129,7 @@ _.extend(module.exports.prototype, {
         });
         this._editorCollection.set(editorModel);
 
-        return this._createService('Binder', editorModel, editBufferMediator);
+        return this._createService('Binder', editorView);
       }
       else {
         throw new Error('Existing binder already open for this editor instance.');

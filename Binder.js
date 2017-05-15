@@ -1,13 +1,12 @@
 var _ = require('underscore'),
   $ = require('jquery');
 
-module.exports = function(editorModel) {
-  this._editorModel = editorModel;
-  this._widgetFactory = editorModel.widgetFactory;
-  this._viewFactory = editorModel.viewFactory;
-  this._widgetStore = editorModel.widgetStore;
-  this._editBufferMediator = editorModel.editBufferMediator;
-  this._editBufferMediator = editorModel.editBufferMediator;
+module.exports = function(editorView) {
+  this._editorView = editorView;
+  this._widgetFactory = editorView.model.widgetFactory;
+  this._viewFactory = editorView.model.viewFactory;
+  this._widgetStore = editorView.model.widgetStore;
+  this._editBufferMediator = editorView.model.editBufferMediator;
 }
 
 _.extend(module.exports.prototype, {
@@ -162,9 +161,18 @@ _.extend(module.exports.prototype, {
    * Cleans up after the widget manager object.
    */
   close: function() {
-    this._editorModel.destroy();
+    this._editorView.model.destroy();
+    this._editorView.stopListening();
     this._widgetStore.cleanup();
     this._editBufferMediator.cleanup();
+  },
+
+  getSettings: function() {
+    return this._editorView.model.context.getSettings();
+  },
+
+  getSetting: function(name) {
+    return this._editorView.model.context.getSetting(name);
   },
 
   /**
