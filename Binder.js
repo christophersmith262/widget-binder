@@ -7,7 +7,7 @@ module.exports = function(editorView) {
   this._viewFactory = editorView.model.viewFactory;
   this._widgetStore = editorView.model.widgetStore;
   this._editBufferMediator = editorView.model.editBufferMediator;
-  this._contextResolver = editorView.model.editBufferMediator;
+  this._contextResolver = editorView.model.contextResolver;
 }
 
 _.extend(module.exports.prototype, {
@@ -17,11 +17,11 @@ _.extend(module.exports.prototype, {
    *
    * @param {jQuery} $targetEl
    *   The element that the new widget will be inserted into.
-   * @param {string} bundleName
-   *   The type of item to request.
+   * @param {string} type
+   *   The schema id of the item to request. This parameter is optional.
    */
-  create: function($targetEl, bundleName) {
-    this._editBufferMediator.requestBufferItem(bundleName, $targetEl);
+  create: function($targetEl, schemaId) {
+    this._editBufferMediator.requestBufferItem(schemaId, $targetEl);
   },
 
   /**

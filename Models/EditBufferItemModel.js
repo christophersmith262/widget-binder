@@ -28,6 +28,8 @@ module.exports = Backbone.Model.extend({
    */
   defaults: {
 
+    'contextId': '',
+
     /**
      * Whether or not the item is ready to be inserted.
      *
@@ -47,7 +49,7 @@ module.exports = Backbone.Model.extend({
      *
      * @type {string}
      */
-    'type': '',
+    'schemaId': '',
 
     'fields': {}
   },

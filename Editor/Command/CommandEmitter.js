@@ -27,17 +27,17 @@ _.extend(module.exports.prototype, {
    *
    * @param {string} targetContextId
    *   The id of the context the new item will be inserted into.
-   * @param {string} bundleName
-   *   The type of item to ie inserted.
+   * @param {string} schemaId
+   *   The schema id to insert. This is optional.
    */
-  insert: function(targetContextId, bundleName) {
+  insert: function(targetContextId, schemaId) {
     var options = {
       command: 'insert',
       targetContext: targetContextId,
     };
 
-    if (bundleName) {
-      options.bundleName = bundleName;
+    if (schemaId) {
+      options.schemaId = schemaId;
     }
 
     this._execute('INSERT_ITEM', options);
@@ -119,6 +119,7 @@ _.extend(module.exports.prototype, {
    *   The command data to be passed to the dispatched.
    */
   _execute: function(type, command) {
+    command.editorContext = this._editorContext;
     this._dispatcher.dispatch(type, command, this._editorContext.getSettings());
   }
 });

@@ -35,11 +35,11 @@ describe('CommandEmitter module', () => {
       }, contextSettings).calledOnce, 'command not dispatched')
       dispatcherMock.dispatch.reset()
 
-      commandEmitter.insert('targetcontext', 'abundle')
+      commandEmitter.insert('targetcontext', 'aschema')
       assert(dispatcherMock.dispatch.withArgs('INSERT_ITEM', {
         command: "insert",
         targetContext: 'targetcontext',
-        bundleName: 'abundle',
+        schemaId: 'aschema',
       }, contextSettings).calledOnce, 'command not dispatched (2)')
       dispatcherMock.dispatch.reset()
     });

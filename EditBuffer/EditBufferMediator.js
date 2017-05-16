@@ -22,10 +22,10 @@ _.extend(module.exports.prototype, Backbone.Events, {
   /**
    * Triggers the widget insertion flow.
    */
-  requestBufferItem: function(bundleName, $el) {
+  requestBufferItem: function(schemaId, $el) {
     var targetContext = this._contextResolver.resolveTargetContext($el);
     this._contextListener.addContext(targetContext);
-    this._editBufferItemRefFactory.requestNewItem(targetContext.get('id'), bundleName);
+    this._editBufferItemRefFactory.requestNewItem(targetContext.get('id'), schemaId);
       
   },
 

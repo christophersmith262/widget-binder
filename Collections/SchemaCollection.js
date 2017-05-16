@@ -23,15 +23,15 @@ module.exports = Backbone.Collection.extend({
 
   /**
    */
-  isAllowed: function(id, bundleName) {
+  isAllowed: function(id, schemaId) {
     var model = this.get(id);
-    return !!(model && model.get('allowed')[bundleName]);
+    return !!(model && model.get('allowed')[schemaId]);
   },
 
   /**
    */
   addContextSchema: function(contextModel) {
-    var id = contextModel.get('field');
+    var id = contextModel.get('schemaId');
     if (id) {
       this._dispatcher.dispatch('FETCH_SCHEMA', {}, id);
     }

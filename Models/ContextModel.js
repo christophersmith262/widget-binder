@@ -14,7 +14,7 @@ module.exports = Backbone.Model.extend({
   type: 'Context',
 
   defaults: {
-    field: '',
+    schemaId: '',
     settings: {},
   },
 

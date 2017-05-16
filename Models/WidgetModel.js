@@ -34,18 +34,18 @@ module.exports = Backbone.Model.extend({
   defaults: {
 
     /**
-     * The data to be sent with the command.
-     *
-     * @type {int}
-     */
-    itemId: 0,
-
-    /**
      * The context the widget is in.
      *
      * @type {string}
      */
     contextId: '',
+
+    /**
+     * The data to be sent with the command.
+     *
+     * @type {int}
+     */
+    itemId: 0,
 
     /**
      * The internal markup to display in the widget.

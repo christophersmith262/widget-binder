@@ -75,9 +75,9 @@ describe('EditBufferMediator module', () => {
   describe('"requestBufferItem"', () => {
     it('should allow clients to request a new buffer item', function() {
       var editBufferMediator = createEditBufferMediator()
-      editBufferMediator.requestBufferItem('testbundle', {})
+      editBufferMediator.requestBufferItem('testtype', {})
       assert(contextListenerMock.addContext.withArgs(targetContextMock).calledOnce, 'context not added to listener')
-      assert(editBufferItemRefFactoryMock.requestNewItem.calledWith('targetcontext', 'testbundle'), 'item not requested')
+      assert(editBufferItemRefFactoryMock.requestNewItem.calledWith('targetcontext', 'testtype'), 'item not requested')
 
       contextListenerMock.trigger('insertItem', new Backbone.Model({
         id: 'newitem1',

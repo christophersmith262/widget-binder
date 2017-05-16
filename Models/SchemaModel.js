@@ -33,8 +33,8 @@ module.exports = Backbone.Model.extend({
 
   /**
    */
-  isAllowed: function(bundleName) {
-    return !!this.get('allowed')[bundleName];
+  isAllowed: function(schemaId) {
+    return !!this.get('allowed')[schemaId];
   },
 
 });

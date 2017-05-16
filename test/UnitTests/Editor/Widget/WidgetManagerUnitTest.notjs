@@ -92,8 +92,8 @@ describe('WidgetManager module', () => {
       var widgetManager = createWidgetManager()
       var $el = $('<div></div>')
       editBufferMediatorMock.requestBufferItem = sinon.stub()
-      widgetManager.insert($el, 'testbundle')
-      assert(editBufferMediatorMock.requestBufferItem.withArgs('testbundle', $el).calledOnce, 'buffer item request not dispatched')
+      widgetManager.insert($el, 'testtype')
+      assert(editBufferMediatorMock.requestBufferItem.withArgs('testtype', $el).calledOnce, 'buffer item request not dispatched')
     });
   });
   describe('"track"', () => {

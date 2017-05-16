@@ -125,7 +125,7 @@ const TestProtocol = WidgetBinder.PluginInterface.SyncProtocol.extend({
   send: function(type, data, settings, resolver) {
     switch (type) {
       case 'INSERT_ITEM':
-        var editBufferItem = this.createEditBufferItem(data.targetContext, data.bundle);
+        var editBufferItem = this.createEditBufferItem(data.targetContext, data.type);
         var response = { editBufferItem: {} };
         response.editBufferItem[editBufferItem.id] = editBufferItem;
         resolver.resolve(response);
@@ -133,13 +133,13 @@ const TestProtocol = WidgetBinder.PluginInterface.SyncProtocol.extend({
     }
   },
 
-  createEditBufferItem: function(contextId, bundle) {
+  createEditBufferItem: function(contextId, type) {
     var editBufferItem = {
       id: this.nextId++,
       contextId: contextId,
       insert: true,
       markup: '<div data-field-name="field1" data-context="nestedcontext" class="widget-sync-field"></div>',
-      type: bundle,
+      schemaId: type,
       fields: {
         field1: {
           type: 'field',
@@ -170,7 +170,7 @@ function test() {
     });
 
     binder = widgetBinder.open($('.editor'));
-    binder.create($('.editor'), 'bundle1');
+    binder.create($('.editor'), 'type1');
     console.log($('.editor').html());
     binder.save(1, $('.widget-binder-widget'));
     console.log($('.editor').html());
