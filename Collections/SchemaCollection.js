@@ -23,9 +23,9 @@ module.exports = Backbone.Collection.extend({
 
   /**
    */
-  isAllowed: function(id, schemaId) {
-    var model = this.get(id);
-    return !!(model && model.get('allowed')[schemaId]);
+  isAllowed: function(schemaId, type) {
+    var model = this.get(schemaId);
+    return !!(model && model.get('allowed')[type]);
   },
 
   /**

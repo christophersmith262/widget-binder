@@ -27,17 +27,17 @@ _.extend(module.exports.prototype, {
    *
    * @param {string} targetContextId
    *   The id of the context the new item will be inserted into.
-   * @param {string} schemaId
-   *   The schema id to insert. This is optional.
+   * @param {string} type
+   *   The type to insert. This is optional.
    */
-  insert: function(targetContextId, schemaId) {
+  insert: function(targetContextId, type) {
     var options = {
       command: 'insert',
       targetContext: targetContextId,
     };
 
-    if (schemaId) {
-      options.schemaId = schemaId;
+    if (type) {
+      options.type = type;
     }
 
     this._execute('INSERT_ITEM', options);

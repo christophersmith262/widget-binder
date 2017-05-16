@@ -139,7 +139,7 @@ const TestProtocol = WidgetBinder.PluginInterface.SyncProtocol.extend({
       contextId: contextId,
       insert: true,
       markup: '<div data-field-name="field1" data-context="nestedcontext" class="widget-sync-field"></div>',
-      schemaId: type,
+      type: type,
       fields: {
         field1: {
           type: 'field',

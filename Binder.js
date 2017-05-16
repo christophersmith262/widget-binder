@@ -18,10 +18,10 @@ _.extend(module.exports.prototype, {
    * @param {jQuery} $targetEl
    *   The element that the new widget will be inserted into.
    * @param {string} type
-   *   The schema id of the item to request. This parameter is optional.
+   *   The type of the item to request. This parameter is optional.
    */
-  create: function($targetEl, schemaId) {
-    this._editBufferMediator.requestBufferItem(schemaId, $targetEl);
+  create: function($targetEl, type) {
+    this._editBufferMediator.requestBufferItem(type, $targetEl);
   },
 
   /**

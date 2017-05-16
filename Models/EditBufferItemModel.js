@@ -49,7 +49,7 @@ module.exports = Backbone.Model.extend({
      *
      * @type {string}
      */
-    'schemaId': '',
+    'type': '',
 
     'fields': {}
   },
