@@ -120,6 +120,7 @@ _.extend(module.exports.prototype, {
           widgetStore: widgetStore,
           editBufferMediator: editBufferMediator,
           context: editorContext,
+          contextResolver: contextResolver,
         });
         var editorView = this._createService('EditorView', {
           model: editorModel,

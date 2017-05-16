@@ -18,6 +18,7 @@ module.exports = Backbone.Model.extend({
     this.widgetStore = config.widgetStore;
     this.editBufferMediator = config.editBufferMediator;
     this.context = config.context;
+    this.contextResolver = config.contextResolver;
     this.listenTo(this.context, 'change:id', this._updateContextId);
   },
 

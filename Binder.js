@@ -7,6 +7,7 @@ module.exports = function(editorView) {
   this._viewFactory = editorView.model.viewFactory;
   this._widgetStore = editorView.model.widgetStore;
   this._editBufferMediator = editorView.model.editBufferMediator;
+  this._contextResolver = editorView.model.editBufferMediator;
 }
 
 _.extend(module.exports.prototype, {
@@ -79,6 +80,8 @@ _.extend(module.exports.prototype, {
     }
   },
 
+  /**
+   */
   unbind: function(id) {
     this._applyToModel(id, function(widgetModel) {
       this._widgetStore.remove(widgetModel, true);
@@ -167,12 +170,33 @@ _.extend(module.exports.prototype, {
     this._editBufferMediator.cleanup();
   },
 
+  /**
+   */
   getSettings: function() {
-    return this._editorView.model.context.getSettings();
+    return this._contextResolver.getEditorContext().getSettings();
   },
 
+  /**
+   */
   getSetting: function(name) {
-    return this._editorView.model.context.getSetting(name);
+    return this._contextResolver.getEditorContext().getSetting(name);
+  },
+
+  /**
+   */
+  resolveContext: function($el, type) {
+    if (!type) {
+      type = 'target';
+    }
+    if (type == 'target') {
+      return this._contextResolver.resolveTargetContext($el);
+    }
+    else if (type == 'source') {
+      return this._contextResolver.resolveSourceContext($el);
+    }
+    else {
+      throw new Error('Invalid context type.');
+    }
   },
 
   /**
