@@ -85,6 +85,9 @@ _.extend(module.exports.prototype, {
         existing.set(attributes);
       }
       else {
+        if (!attributes.id) {
+          attributes.id = id;
+        }
         resolvedCollection.add(attributes);
       }
     });

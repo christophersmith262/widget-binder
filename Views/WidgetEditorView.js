@@ -18,6 +18,21 @@ var _ = require('underscore'),
  */
 module.exports = Backbone.View.extend({
 
+  actions: {
+    edit: {
+      title: 'Edit',
+      callback: function() {
+        this.save().edit();
+      }
+    },
+    remove: {
+      title: 'Remove',
+      callback: function() {
+        this.remove();
+      }
+    }
+  },
+
   /**
    * {@inheritdoc}
    */
@@ -39,38 +54,80 @@ module.exports = Backbone.View.extend({
     this.commandAttribute = widgetCommandTemplate.getAttributeName('<command>');
     this.inlineEditorSelector = fieldTemplate.getSelector();
 
+    this._state = {};
+
     // Set up the change handler.
     this.listenTo(this.model, 'change', this._changeHandler);
+    this.listenTo(this.model, 'rebase', this._rebase);
+    this._rebased = {};
   },
 
   /**
    */
-  template: function(elementFactory, markup) {
+  template: function(elementFactory, markup, actions) {
   },
 
   /**
    */
-  render: function() {
+  render: function(preserveDomEdits) {
     if (this.model.get('duplicating')) {
-      this.$el.html(this.template(this._elementFactory, '...'));
+      this.$el.html(this.template(this._elementFactory, '...', this.actions));
     }
     else {
+      if (preserveDomEdits) {
+        var domEdits = {};
+        this._inlineElementVisitor(function($el, contextString, selector) {
+          domEdits[contextString] = $el.children();
+        });
+
+        var $oldContainer = $('<div></div>');
+        var $newContainer = $('<div></div>');
+        var $oldChildren = this.$el.children();
+        this.$el.append($oldContainer);
+        this.$el.append($newContainer);
+
+        $oldContainer.append($oldChildren);
+        $newContainer.html(this.template(this._elementFactory, this.model.get('markup'), this.actions)); 
+        this._find(this.inlineEditorSelector, $oldContainer).attr(this.inlineContextAttribute, '');
+
+        this._inlineElementVisitor(function($el, contextString, selector) {
+          this.adapter.attachInlineEditing(this, contextString, selector);
+
+          if (domEdits[contextString]) {
+            $el.html('').append(domEdits[contextString]);
+          }
+        }, $newContainer);
+
+        this.$el.append($newContainer.children());
+        $oldContainer.remove();
+        $newContainer.remove();
+      }
+      else {
+        this.$el.html(this.template(this._elementFactory, this.model.get('markup'), this.actions));
+
+        this._rebase();
+        var edits = this.model.get('edits');
+        this._inlineElementVisitor(function($el, contextString, selector) {
+          if (edits[contextString]) {
+            $el.html(edits[contextString] ? edits[contextString] : '');
+          }
+
+          this.adapter.attachInlineEditing(this, contextString, selector);
+        });
+      }
+
+      _.each(this._rebased, function(unused, contextString) {
+        var selector = '[' + this.inlineContextAttribute + '="' + contextString + '"]';
+        this.adapter.detachInlineEditing(this, contextString, selector);
+      }, this);
+      this._rebased = {};
+
       var view = this;
-      this.$el.html(this.template(this._elementFactory, this.model.get('markup')));
-
-      this.$el.find(this.commandSelector).on('click', function() {
-        var command = $(this).attr(view.commandAttribute);
-
-        if (command == 'edit') {
-          view.save().edit();
-        }
-        else if (command == 'remove') {
-          view.remove();
-        }
+      this._find(this.commandSelector).on('click', function() {
+        var action = $(this).attr(view.commandAttribute);
+        view.actions[action].callback.call(view);
       });
-
       this.renderAttributes();
-      this.renderEdits();
     }
 
     return this;
@@ -94,21 +151,6 @@ module.exports = Backbone.View.extend({
 
   /**
    */
-  renderEdits: function() {
-    var edits = this.model.get('edits');
-    this._inlineElementVisitor(function($el, contextString, selector) {
-      // Fetch the edit and set a data attribute to make associating edits
-      // easier for whoever is going to attach the inline editor.
-      $el.html(edits[contextString] ? edits[contextString] : '');
-
-      // Tell the widget manager to enable inline editing for this element.
-      this.adapter.attachInlineEditing(this, contextString, selector);
-    });
-    return this;
-  },
-
-  /**
-   */
   save: function() {
 
     if (!this.model.get('duplicating')) {
@@ -124,15 +166,28 @@ module.exports = Backbone.View.extend({
 
   /**
    */
-  rebase: function() {
-    var oldEdits = _.pairs(this.model.get('edits'));
-    var edits = {};
-    this._inlineElementVisitor(function($el, contextString, selector) {
-      var next = oldEdits.shift();
-      edits[contextString] = next ? next[1] : '';
-    });
-    this.model.set({edits: edits});
+  _rebase: function(model, oldId, newId) {
+    if (!model) {
+      model = this.model;
+    }
 
+    if (oldId && newId) {
+      this._inlineElementVisitor(function($el, contextString, selector) {
+        if (contextString == oldId) {
+          $el.attr(this.inlineContextAttribute, newId);
+        }
+      });
+      this._rebased[oldId] = true;
+    }
+    else {
+      var oldEdits = _.toArray(this.model.get('edits'));
+      var edits = {};
+      this._inlineElementVisitor(function($el, contextString, selector) {
+        var oldEdit = oldEdits.pop();
+        edits[contextString] = oldEdit ? oldEdit : '';
+      });
+      this.model.set({ edits: edits }, { silent: true });
+    }
     return this;
   },
 
@@ -157,7 +212,7 @@ module.exports = Backbone.View.extend({
   /**
    */
   stopListening: function() {
-    this.$el.find(this.commandSelector).off();
+    this._find(this.commandSelector).off();
     return Backbone.View.prototype.stopListening.call(this);
   },
 
@@ -170,29 +225,17 @@ module.exports = Backbone.View.extend({
   /**
    */
   _changeHandler: function() {
-    // If the widget is currently asking for a duplicate buffer item from the
-    // server, or such a request just finished, we don't want to save the
-    // current state of the editor since it is just displaying a 'loading'
-    // message.
-    if (this.model.previous('duplicating')) {
-      this.render().rebase();
-    }
-
-    // If the markup changed and the widget wasn't duplicating, we have to
-    // re-render everything.
-    else if (this.model.get('duplicating') || this.model.hasChanged('markup')) {
+    var markupChanged = this.model.hasChanged('markup');
+    if (this.model.get('duplicating') || this.model.previous('duplicating')) {
       this.render();
     }
 
-    // Otherwise we can just re-render the parts that changed.
-    else {
-      if (this.model.hasChanged('edits')) {
-        this.renderEdits();
-      }
+    else if (this.model.hasChanged('markup')) {
+      this.render(true);
+    }
 
-      if (this.model.hasChanged('itemId') || this.model.hasChanged('itemContextId')) {
-        this.renderAttributes();
-      }
+    else if (this.model.hasChanged('itemId') || this.model.hasChanged('contextId')) {
+      this.renderAttributes();
     }
 
     return this;
@@ -200,15 +243,39 @@ module.exports = Backbone.View.extend({
 
   /**
    */
-  _inlineElementVisitor: function(callback) {
+  _inlineElementVisitor: function(callback, $rootEl) {
+    if (!$rootEl) {
+      $rootEl = this.$el;
+    }
     var view = this;
-    this.$el.find(this.inlineEditorSelector).each(function() {
+    this._find(this.inlineEditorSelector, $rootEl).each(function() {
       if ($(this).closest(view.widgetSelector).is(view.$el)) {
         var contextString = $(this).attr(view.inlineContextAttribute);
-        var selector = view.inlineEditorSelector + '[' + view.inlineContextAttribute + '="' + contextString + '"]';
+        var selector = '[' + view.inlineContextAttribute + '="' + contextString + '"]';
         callback.call(view, $(this), contextString, selector);
       }
     });
-  }
+  },
+
+  _find: function(selector, $rootEl) {
+    var view = this;
+    var $result = $([]);
+
+    if (!$rootEl) {
+      $rootEl = this.$el;
+    }
+
+    $rootEl.children().each(function() {
+      var $child = $(this);
+      if ($child.is(selector)) {
+        $result = $result.add($child);
+      }
+      if (!$child.is(view.widgetSelector)) {
+        $result = $result.add(view._find(selector, $child));
+      }
+    });
+
+    return $result;
+  },
 
 });

@@ -6,7 +6,6 @@
 'use strict';
 
 var Backbone = require('backbone'),
-  EditBufferItemCollection = require('./EditBufferItemCollection'),
   ContextModel = require('../Models/ContextModel');
 
 /**
@@ -23,8 +22,7 @@ module.exports = Backbone.Collection.extend({
         if (!settings) {
           settings = {};
         }
-        var editBuffer = new EditBufferItemCollection([], { contextId: contextString });
-        var model = new ContextModel({ id: contextString }, { editBuffer: editBuffer, settings: settings });
+        var model = new ContextModel({ id: contextString, settings: settings });
         this.add(model);
       }
     }
@@ -35,6 +33,6 @@ module.exports = Backbone.Collection.extend({
    */
   touch: function(contextString) {
     this.get(contextString);
-  },
+  }
 
 });

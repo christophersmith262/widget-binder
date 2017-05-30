@@ -1,23 +1,28 @@
 
 'use strict';
 
+var _ = require('underscore');
+
 /**
  */
-module.exports = function(elementFactory, markup) {
+module.exports = function(elementFactory, markup, actions) {
   var displayElement = elementFactory.create('widget-display');
   var toolbarElement = elementFactory.create('toolbar');
   var toolbarItemElement = elementFactory.create('toolbar-item');
   var commandElement = elementFactory.create('widget-command');
 
-  return displayElement.renderOpeningTag()
+  var result = displayElement.renderOpeningTag()
     + markup
-    + toolbarElement.renderOpeningTag()
-      + toolbarItemElement.renderOpeningTag()
-        + commandElement.setAttribute('<command>', 'edit').renderOpeningTag() + commandElement.renderClosingTag()
-      + toolbarItemElement.renderClosingTag()
-      + toolbarItemElement.renderOpeningTag()
-        + commandElement.setAttribute('<command>', 'delete').renderOpeningTag() + commandElement.renderClosingTag()
-      + toolbarItemElement.renderClosingTag()
-    + toolbarElement.renderClosingTag()
-  + displayElement.renderClosingTag();
+    + toolbarElement.renderOpeningTag();
+
+  _.each(actions, function(def, id) {
+      result += toolbarItemElement.renderOpeningTag()
+        + commandElement.setAttribute('<command>', id).renderOpeningTag() + def.title + commandElement.renderClosingTag()
+      + toolbarItemElement.renderClosingTag();
+  });
+
+  result += toolbarElement.renderClosingTag()
+    + displayElement.renderClosingTag();
+
+  return result;
 };

@@ -1,5 +1,6 @@
 var _ = require('underscore'),
-  $ = require('jquery');
+  $ = require('jquery'),
+  WidgetModel = require('./Models/WidgetModel');
 
 module.exports = function(editorView) {
   this._editorView = editorView;
@@ -97,8 +98,8 @@ _.extend(module.exports.prototype, {
    * @return {WidgetModel}
    *   A widget model if the id existed in the store, or undefined otherwise.
    */
-  get: function(id) {
-    return this._widgetStore.get(id).model;
+  get: function(id, options) {
+    return this._widgetStore.get(id, { raw: true }).model;
   },
 
   /**

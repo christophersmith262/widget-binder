@@ -5,7 +5,8 @@
 
 'use strict';
 
-var _ = require('underscore');
+var _ = require('underscore'),
+    $ = require('jquery');
 
 /**
  */
@@ -21,6 +22,25 @@ _.extend(module.exports, {
   PluginInterface: {
     EditorAdapter: require('./Plugins/EditorAdapter'),
     SyncProtocol: require('./Plugins/SyncProtocol'),
+  },
+  config: function() {
+    var defaults = module.exports.defaults;
+    var config = {};
+    config.servicePrototypes = {};
+    _.defaults(config.servicePrototypes, defaults.servicePrototypes);
+    config.views = {};
+    _.each(defaults.views, function(def, name) {
+      config.views[name] = { options: {} };
+      _.defaults(config.views[name].options, def.options);
+      _.defaults(config.views[name], def);
+    });
+    config.plugins = {};
+    _.defaults(config.plugins, defaults.plugins);
+    $.extend(true, config.elements, defaults.elements);
+    config.data = {};
+    _.defaults(config.data, defaults.data);
+    _.defaults(config, defaults);
+    return config;
   }
 });
 
@@ -160,7 +180,7 @@ _.extend(module.exports.prototype, {
       contextCollection: contextCollection,
       dispatcher: this._syncActionDispatcher,
     });
-    this._editorCollection = schemaCollection;
+    this._editorCollection = editorCollection;
     this._contextCollection = contextCollection;
     this._schemaCollection = schemaCollection;
 
@@ -172,7 +192,15 @@ _.extend(module.exports.prototype, {
       return contextCollection.get(attributes.contextId).editBuffer;
     });
     this._syncActionResolver.addCollection('widget', function(attributes) {
-      return editorCollection.get(attributes.contextId).widgetStore;
+      var widgetStore = editorCollection.get(attributes.editorContextId).widgetStore;
+      return {
+        get: function(id) {
+          return widgetStore.get(id).model;
+        },
+        add: function(attributes) {
+          return widgetStore.add(attributes);
+        }
+      };
     });
 
     // Create an element factory to provide a generic way to create markup.

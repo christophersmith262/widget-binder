@@ -52,16 +52,18 @@ module.exports = {
         'data-context-hint': '<context>',
         'data-viewmode': '<viewmode>',
         'class': 'widget-binder-widget'
-      }
+      },
+      selector: '.widget-binder-widget[data-context-hint]',
     },
     'field': {
       tag: 'div',
       attributes: {
-        'data-field-name': '<field>',
+        'data-field-name': '<name>',
         'data-context': '<context>',
         'data-mutable': '<editable>',
         'class': 'widget-binder-field'
-      }
+      },
+      selector: '.widget-binder-field[data-mutable="true"]',
     },
     'widget-display': {
       tag: 'div',

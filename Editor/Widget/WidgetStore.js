@@ -56,7 +56,7 @@ _.extend(module.exports.prototype, Backbone.Events, {
       }
     }
     else {
-      this.listenTo(widgetModel, 'destroy', this.remove);
+      this.listenTo(widgetModel, 'destroy', this._removeWrapper);
       this.listenTo(widgetModel, 'change:itemId', this._updateItemReference);
       this._widgetCollection.add(widgetModel);
     }
@@ -82,10 +82,13 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   and view objects associated with the widget id. If either cannot be
    *   found, the value in the respective key is null.
    */
-  get: function(id) {
-    var widgetModel = this._widgetCollection.get(id);
+  get: function(id, options) {
+    if (!options) {
+      options = {};
+    }
 
-    if (widgetModel) {
+    var widgetModel = this._widgetCollection.get(id);
+    if (widgetModel && !options.raw) {
       var i = widgetModel.get('itemId');
       var j = widgetModel.get('id');
       return {
@@ -95,7 +98,7 @@ _.extend(module.exports.prototype, Backbone.Events, {
     }
 
     return {
-      model: null,
+      model: widgetModel,
       view: null
     };
   },
@@ -117,6 +120,10 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   destroyed.
    */
   remove: function(widgetModel, skipDestroy) {
+    if (!widgetModel) {
+      return;
+    }
+
     var i = widgetModel.get('itemId');
     var j = widgetModel.get('id');
 
@@ -250,4 +257,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
 
     this._cleanRow(i);
   },
+
+  _removeWrapper: function(widgetModel) {
+    this.remove(widgetModel);
+  }
 });

@@ -31,9 +31,16 @@ module.exports = Backbone.Collection.extend({
   /**
    */
   addContextSchema: function(contextModel) {
+    this._fetchSchema(contextModel);
+    this.listenTo(contextModel, 'change:schemaId', this._fetchSchema);
+  },
+
+  _fetchSchema: function(contextModel) {
     var id = contextModel.get('schemaId');
     if (id) {
-      this._dispatcher.dispatch('FETCH_SCHEMA', {}, id);
+      if (!this.get(id)) {
+        this._dispatcher.dispatch('FETCH_SCHEMA', id);
+      }
     }
   }
 

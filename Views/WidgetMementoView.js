@@ -24,6 +24,7 @@ module.exports = Backbone.View.extend({
     var fieldTemplate = this.elementFactory.getTemplate('field');
 
     // Set up attribute / element selectors.
+    this.widgetSelector = widgetTemplate.getSelector();
     this.inlineContextAttribute = fieldTemplate.getAttributeName('<context>');
     this.inlineEditorSelector = fieldTemplate.getSelector();
 
@@ -58,8 +59,10 @@ module.exports = Backbone.View.extend({
     var edits = {};
     var view = this;
     this.$el.find(this.inlineEditorSelector).each(function() {
-      var contextString = $(this).attr(view.inlineContextAttribute);
-      edits[contextString] = $(this).html();
+      if ($(this).closest(view.widgetSelector).is(view.$el)) {
+        var contextString = $(this).attr(view.inlineContextAttribute);
+        edits[contextString] = $(this).html();
+      }
     });
     this.model.set({edits: edits}, {silent: true});
     return this;

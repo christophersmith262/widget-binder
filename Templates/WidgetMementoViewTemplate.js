@@ -16,6 +16,7 @@ module.exports = function(elementFactory, fields, edits) {
       if (node.type == 'field') {
         if (node.context) {
           edit = edits[node.context];
+          element.setAttribute('<editable>', 'true');
         }
         else {
           element.setAttribute('<editable>', 'false');

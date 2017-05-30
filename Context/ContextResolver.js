@@ -21,19 +21,19 @@ _.extend(module.exports.prototype, {
   /**
    */
   resolveTargetContext: function ($el) {
-    var contextString = $el.attr(this._targetContextAttribute);
-    if (!contextString) {
-      contextString = $el.closest('[' + this._targetContextAttribute + ']').attr(this._targetContextAttribute);
+    var contextId = $el.attr(this._targetContextAttribute);
+    if (!contextId) {
+      contextId = $el.closest('[' + this._targetContextAttribute + ']').attr(this._targetContextAttribute);
     }
 
-    return this.get(contextString);
+    return this.get(contextId);
   },
 
   /**
    */
   resolveSourceContext: function($el) {
-    var contextString = $el.attr(this._sourceContextAttribute);
-    return contextString ? this.get(contextString) : this._editorContext;
+    var contextId = $el.attr(this._sourceContextAttribute);
+    return contextId ? this.get(contextId) : this._editorContext;
   },
 
   /**
@@ -44,10 +44,10 @@ _.extend(module.exports.prototype, {
 
   /**
    */
-  get: function(contextString) {
-    if (contextString) {
+  get: function(contextId) {
+    if (contextId) {
       var settings = this._editorContext ? this._editorContext.getSettings() : {};
-      return this._contextCollection.get(contextString, settings);
+      return this._contextCollection.get(contextId, settings);
     }
     else {
       return this._editorContext;
@@ -56,8 +56,8 @@ _.extend(module.exports.prototype, {
 
   /**
    */
-  touch: function(contextString) {
-    return this._contextCollection.touch(contextString);
+  touch: function(contextId) {
+    return this._contextCollection.touch(contextId);
   },
 
 });

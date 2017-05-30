@@ -48,6 +48,13 @@ module.exports = Backbone.Model.extend({
     itemId: 0,
 
     /**
+     * The data to be sent with the command.
+     *
+     * @type {int}
+     */
+    itemContextId: '',
+
+    /**
      * The internal markup to display in the widget.
      *
      * @type {string}
@@ -233,7 +240,8 @@ module.exports = Backbone.Model.extend({
       }, this);
     }
 
-    this.set(attributes, {silent: true});
+    this.set(attributes);
+    this.trigger('rebase', this, oldId, newId);
   },
 
 });

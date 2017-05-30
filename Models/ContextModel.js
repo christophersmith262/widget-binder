@@ -5,7 +5,8 @@
 
 'use strict';
 
-var Backbone = require('backbone');
+var Backbone = require('backbone'),
+  EditBufferItemCollection = require('../Collections/EditBufferItemCollection');
 
 /**
  */
@@ -22,10 +23,7 @@ module.exports = Backbone.Model.extend({
    * {@inheritdoc}
    */
   constructor: function(attributes, options) {
-    this.editBuffer = options.editBuffer;
-    if (!attributes.settings) {
-      attributes.settings = {};
-    }
+    this.editBuffer = new EditBufferItemCollection([], { contextId: attributes.id });
     Backbone.Model.apply(this, [attributes, options]);
   },
 
@@ -37,7 +35,19 @@ module.exports = Backbone.Model.extend({
       delete attributes.editBufferItems;
     }
 
-    return Backbone.Model.prototype.set.call(this, attributes, options);
+    var oldId = this.get('id');
+    var newId = attributes.id;
+    if (newId && oldId && newId != oldId) {
+      var collection = this.collection;
+      if (collection) {
+        collection.remove(this, { silent: true });
+        this.attributes.id = this.id = newId;
+        collection.add(this, { silent: true });
+        this.attributes.id = this.id = oldId;
+      }
+    }
+
+    Backbone.Model.prototype.set.call(this, attributes, options);
   },
 
   /**
