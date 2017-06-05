@@ -71,6 +71,7 @@ module.exports = Backbone.View.extend({
    */
   render: function(preserveDomEdits) {
     if (this.model.get('duplicating')) {
+      this.trigger('DOMRemove', this, this.$el.children());
       this.$el.html(this.template(this._elementFactory, '...', this.actions));
     }
     else {
@@ -99,10 +100,12 @@ module.exports = Backbone.View.extend({
         }, $newContainer);
 
         this.$el.append($newContainer.children());
+        this.trigger('DOMRemove', this, $oldContainer);
         $oldContainer.remove();
         $newContainer.remove();
       }
       else {
+        this.trigger('DOMRemove', this, this.$el.children());
         this.$el.html(this.template(this._elementFactory, this.model.get('markup'), this.actions));
 
         this._rebase();
@@ -130,6 +133,9 @@ module.exports = Backbone.View.extend({
       this.renderAttributes();
     }
 
+    this.trigger('DOMRender', this, this.$el);
+    this.trigger('DOMMutate', this, this.$el);
+
     return this;
   },
 
@@ -145,6 +151,8 @@ module.exports = Backbone.View.extend({
     _.each(element.getAttributes(), function(value, name) {
       this.$el.attr(name, value);
     }, this);
+
+    this.trigger('DOMMutate', this, this.$el);
 
     return this;
   },
@@ -205,6 +213,7 @@ module.exports = Backbone.View.extend({
       var model = this.model;
       this.model = null;
       model.destroy();
+      this.trigger('DOMRemove', this, this.$el);
     }
     return this;
   },

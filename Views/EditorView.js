@@ -28,6 +28,7 @@ module.exports = Backbone.View.extend({
   render: function() {
     var template = this._elementFactory.getTemplate('field');
     this.$el.attr(template.getAttributeName('<context>'), this.model.get('context'));
+    this.trigger('DOMMutate', this, this.$el);
   },
 
 });

@@ -20,7 +20,7 @@ function unimplemented() {
 module.exports = function() {
 };
 
-_.extend(module.exports.prototype, {
+_.extend(module.exports.prototype, Backbone.Events, {
 
   /**
    * Inserts an embed code into the editor.
@@ -111,6 +111,7 @@ _.extend(module.exports.prototype, {
    * usually not necessary to implement this method.
    */
   cleanup: function() {
+    this.stopListening();
   }
 
 });

@@ -1,4 +1,5 @@
 var _ = require('underscore'),
+  Backbone = require('backbone'),
   $ = require('jquery'),
   WidgetModel = require('./Models/WidgetModel');
 
@@ -11,7 +12,7 @@ module.exports = function(editorView) {
   this._contextResolver = editorView.model.contextResolver;
 }
 
-_.extend(module.exports.prototype, {
+_.extend(module.exports.prototype, Backbone.Events, {
 
   /**
    * Requests that a new widget be inserted.
@@ -55,6 +56,8 @@ _.extend(module.exports.prototype, {
 
     // Add the widget to the widget to the table to keep track of it.
     this._widgetStore.add(widgetModel, widgetEditorView);
+
+    this.trigger('bind', this, widgetModel, widgetEditorView);
 
     // If the widget is not currently using the editor view mode, we treat
     // it as being in 'export' form. This means we have to create an export

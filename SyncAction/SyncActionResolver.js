@@ -49,11 +49,19 @@ _.extend(module.exports.prototype, {
    *   collection. Each entry in the object should contain a javascript object,
    *   keyed by the model's id, and containg the model attributes to be set in
    *   the collection as a value.
+   *
+   *   [
+   *    {
+   *      type: 'asset',
+   *      id: '',
+   *      attributes: '',
+   *    },
+   *   ]
    */
   resolve: function(response) {
-    _.each(response, function(models, modelName) {
-      if (this._collections[modelName]) {
-        this._updateModels(models, this._collections[modelName]);
+    _.each(response, function(model) {
+      if (this._collections[model.type]) {
+        this._updateModel(model, this._collections[model.type]);
       }
     }, this);
   },
@@ -67,30 +75,28 @@ _.extend(module.exports.prototype, {
    *   Can either be a Backbone.Collection to add the model to, or a callback
    *   which returns the collection.
    */
-  _updateModels: function(models, collection) {
+  _updateModel: function(model, collection) {
     var resolvedCollection = collection;
-    _.each(models, function(attributes, id) {
 
-      // If a function is passed as the collection, we call it to resolve the
-      // actual collection for this model.
-      if (typeof collection == 'function') {
-        resolvedCollection = collection(attributes);
-      }
+    // If a function is passed as the collection, we call it to resolve the
+    // actual collection for this model.
+    if (typeof collection == 'function') {
+      resolvedCollection = collection(model.attributes);
+    }
 
-      // We first try to load the existing model instead of directly setting the
-      // model in collection since it is completely valid for a model's id to
-      // change.
-      var existing = resolvedCollection.get(id);
-      if (existing) {
-        existing.set(attributes);
+    // We first try to load the existing model instead of directly setting the
+    // model in collection since it is completely valid for a model's id to
+    // change.
+    var existing = resolvedCollection.get(model.id);
+    if (existing) {
+      existing.set(model.attributes);
+    }
+    else {
+      if (!model.attributes.id) {
+        model.attributes.id = model.id;
       }
-      else {
-        if (!attributes.id) {
-          attributes.id = id;
-        }
-        resolvedCollection.add(attributes);
-      }
-    });
+      resolvedCollection.add(model.attributes);
+    }
   }
 
 });
