@@ -19,6 +19,8 @@ var _ = require('underscore'),
  * @param {string} uuidAttributeName
  *   The name of the uuid attribute on the widget element to pull edit buffer
  *   item ids from the DOM.
+ *
+ * @constructor
  */
 module.exports = function(contextResolver, editBufferItemRefFactory, uuidAttributeName) {
   this._contextResolver = contextResolver;

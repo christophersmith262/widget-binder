@@ -4,6 +4,7 @@
 var _ = require('underscore');
 
 /**
+ * @inheritdoc
  */
 module.exports = function(elementFactory, markup, actions) {
   var displayElement = elementFactory.create('widget-display');
@@ -16,8 +17,8 @@ module.exports = function(elementFactory, markup, actions) {
     + toolbarElement.renderOpeningTag();
 
   _.each(actions, function(def, id) {
-      result += toolbarItemElement.renderOpeningTag()
-        + commandElement.setAttribute('<command>', id).renderOpeningTag() + def.title + commandElement.renderClosingTag()
+    result += toolbarItemElement.renderOpeningTag()
+      + commandElement.setAttribute('<command>', id).renderOpeningTag() + def.title + commandElement.renderClosingTag()
       + toolbarItemElement.renderClosingTag();
   });
 

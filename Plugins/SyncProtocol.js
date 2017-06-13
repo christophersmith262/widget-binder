@@ -6,7 +6,8 @@
 'use strict';
 
 var _ = require('underscore'),
-  Backbone = require('backbone');
+  Backbone = require('backbone'),
+  unimplemented = require('unimplemented');
 
 /**
  * A base for protocol plugins.
@@ -40,13 +41,13 @@ _.extend(module.exports.prototype, {
    *   'DUPLICATE_ITEM', 'FETCH_SCHEMA'.
    * @param {object} data
    *   The data to be sent in the request.
-   * @param {object} settings
-   *   Non-command specific context settings.
    * @param {SyncActionResolver} resolver
    *   The resolver service that will be used to resolve the command.
+   *
+   * @return {void}
    */
-  send: function(type, data, settings, resolver) {
-    throw new Error('Unimplemented method.');
+  send: function(type, data, resolver) {
+    unimplemented(type, data, resolver);
   }
 
 });

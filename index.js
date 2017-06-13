@@ -6,9 +6,15 @@
 'use strict';
 
 var _ = require('underscore'),
-    $ = require('jquery');
+  $ = require('jquery');
 
 /**
+ * The widget-sync library application root object.
+ *
+ * @param {object} config
+ *   A map of configuration. See the default configuration as a reference.
+ *
+ * @constructor
  */
 module.exports = function(config) {
   if (!config) {
@@ -18,11 +24,36 @@ module.exports = function(config) {
 };
 
 _.extend(module.exports, {
+
   defaults: require('./config'),
+
   PluginInterface: {
     EditorAdapter: require('./Plugins/EditorAdapter'),
     SyncProtocol: require('./Plugins/SyncProtocol'),
   },
+
+  /**
+   * A convenience factory method to create the WidgetBinder application root.
+   *
+   * @param {object} config
+   *   A map of configuration. See the default configuration as a reference.
+   *
+   * @return {WidgetBinder}
+   *   The root WidgetBinder library object.
+   */
+  create: function(config) {
+    return new module.exports(config);
+  },
+
+  /**
+   * Creates a copy of the default configuration and returns it.
+   *
+   * Call this method to avoid accidently making changes to the default
+   * configuration object.
+   *
+   * @return {object}
+   *   A copy of the default configuration object.
+   */
   config: function() {
     var defaults = module.exports.defaults;
     var config = {};
@@ -47,48 +78,79 @@ _.extend(module.exports, {
 _.extend(module.exports.prototype, {
 
   /**
-   */
-  getInstanceName: function() {
-    return this._globalSettings.name;
-  },
-
-  /**
+   * Gets the element factory.
+   *
+   * @return {ElementFactory}
+   *   The element factory used to create element templates and instances.
    */
   getElementFactory: function() {
     return this._elementFactory;
   },
 
   /**
+   * Gets the context collection.
+   *
+   * @return {ContextCollection}
+   *   The collection of all contexts referenced in every bound editor.
    */
   getContexts: function() {
     return this._contextCollection;
   },
 
   /**
+   * Gets the schema collection.
+   *
+   * @return {SchemaCollection}
+   *   The collection of all schema nodes.
    */
   getSchema: function() {
     return this._schemaCollection;
   },
 
   /**
+   * Gets the editor collection.
+   *
+   * @return {EditorCollection}
+   *   The collection of all associated editors.
    */
   getEditors: function() {
     return this._editorCollection;
   },
 
   /**
+   * Gets the sync action dispatcher.
+   *
+   * @return {SyncActionDispatcher}
+   *   The dispatcher for dispatching editor commands.
    */
   getSyncActionDispatcher: function() {
     return this._syncActionDispatcher;
   },
 
   /**
+   * Gets the sync action resolver.
+   *
+   * @return {SyncActionResolver}
+   *   The resolver for resolving sync action commands.
    */
   getSyncActionResolver: function() {
     return this._syncActionResolver;
   },
 
   /**
+   * Opens a widget binder for a given editor.
+   *
+   * To close the binder later, call binder.close().
+   *
+   * @see Binder
+   *
+   * @param {jQuery} $editorEl
+   *   The root element for the editor. This must have the context id attached
+   *   as an attribute according to the 'field' template '<context>' data key name.
+   *   By default this is 'data-context'.
+   *
+   * @return {Binder}
+   *   The opened widget binder for the editor.
    */
   open: function($editorEl) {
     $editorEl.addClass('widget-binder-open');
@@ -99,7 +161,7 @@ _.extend(module.exports.prototype, {
     if (editorContextId) {
       if (!this._editorCollection.get(editorContextId)) {
         var contextResolver = this._createContextResolver(editorContext);
-        var commandEmitter = this._createService('CommandEmitter', this._syncActionDispatcher, editorContext);
+        var commandEmitter = this._createService('CommandEmitter', this._syncActionDispatcher, contextResolver);
         var editBufferItemRefFactory = this._createService('EditBufferItemRefFactory', contextResolver, commandEmitter);
 
         // Setup a context listener for recieving buffer item arrival
@@ -159,6 +221,12 @@ _.extend(module.exports.prototype, {
   },
 
   /**
+   * Handles the initialization of objects that live at the application root.
+   *
+   * @param {object} config
+   *   The config object as passed to the constructor.
+   *
+   * @return {void}
    */
   _initialize: function(config) {
     this._globalSettings = _.defaults(config, module.exports.defaults);
@@ -213,6 +281,13 @@ _.extend(module.exports.prototype, {
   },
 
   /**
+   * Helper function to create a context resolver for a given editor instance.
+   *
+   * @param {Context} editorContext
+   *   The root context of the editor.
+   *
+   * @return {ContextResolver}
+   *   A context resolver specific to the provided editor context.
    */
   _createContextResolver: function(editorContext) {
     var sourceContextAttribute = this._elementFactory.getTemplate('widget').getAttributeName('<context>');

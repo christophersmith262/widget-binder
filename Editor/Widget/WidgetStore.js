@@ -16,6 +16,8 @@ var _ = require('underscore'),
  * @param {EditorAdapter} adapter
  *   The editor adapter that will be used to tie the editor widget state to the
  *   internal tracked widget state.
+ *
+ * @constructor
  */
 module.exports = function(adapter) {
   this._adapter = adapter;
@@ -39,6 +41,9 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   An optional view corresponding to the widget's DOM element, if one
    *   exists. This will be used to track whether the widget is present in the
    *   DOM and if it gets orphaned.
+   *
+   * @return {WidgetModel}
+   *   The added model.
    */
   add: function(widgetModel, widgetView) {
     if (!(widgetModel instanceof Backbone.Model)) {
@@ -69,6 +74,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
       }
       this._views[i][j] = widgetView;
     }
+
+    return widgetModel;
   },
 
   /**
@@ -76,19 +83,19 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {mixed} id
    *   The id of the widget to get.
+   * @param {bool} modelOnly
+   *   Set to true to skip editor view lookup. This should be used for
+   *   read-only access to the model since this method has the side-effect of
+   *   cleaning up the reference table if the view is not found in the DOM.
    *
    * @return {object}
    *   An object with keys 'model' and 'view', which are respectively the model
    *   and view objects associated with the widget id. If either cannot be
    *   found, the value in the respective key is null.
    */
-  get: function(id, options) {
-    if (!options) {
-      options = {};
-    }
-
+  get: function(id, modelOnly) {
     var widgetModel = this._widgetCollection.get(id);
-    if (widgetModel && !options.raw) {
+    if (widgetModel && !modelOnly) {
       var i = widgetModel.get('itemId');
       var j = widgetModel.get('id');
       return {
@@ -118,6 +125,9 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   destroying the editor widget. By default, calling this method will
    *   trigger widget destruction within the editor if it has not already been
    *   destroyed.
+   *
+   * @return {WidgetModel}
+   *   The widget model that was destroyed.
    */
   remove: function(widgetModel, skipDestroy) {
     if (!widgetModel) {
@@ -146,6 +156,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
     this._cleanRow(i);
     this._widgetCollection.remove(widgetModel);
     widgetModel.setState(WidgetModel.State.DESTROYED_REFS);
+
+    return widgetModel;
   },
 
   /**
@@ -177,6 +189,10 @@ _.extend(module.exports.prototype, Backbone.Events, {
   },
 
   /**
+   * Triggers the destruction of all tracked widgets and data structures.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   cleanup: function() {
     for (var i in this._views) {
@@ -187,7 +203,7 @@ _.extend(module.exports.prototype, Backbone.Events, {
     }
     this._widgetCollection.reset();
     this._adapter.cleanup();
-    this.stopListening();
+    return this.stopListening();
   },
 
   /**
@@ -224,6 +240,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
    * @param {int} i
    *   The row in the view table to check for cleanup. If this row is empty, it
    *   will be removed.
+   *
+   * @return {void}
    */
   _cleanRow: function(i) {
     if (this._views[i] && _.isEmpty(this._views[i])) {
@@ -241,6 +259,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {WidgetModel} widgetModel
    *   The widget model that has had its itemId attribute updated.
+   *
+   * @return {void}
    */
   _updateItemReference: function(widgetModel) {
     var i = widgetModel.previous('itemId');

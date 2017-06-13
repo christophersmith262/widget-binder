@@ -12,12 +12,15 @@ var _ = require('underscore');
  *
  * @param {SyncActionDispatcher} dispatcher
  *   The action dispatcher to use for dispatching commands.
- * @param {EditorContext} editorContext
- *   The editor context to use to get sync settings from.
+ * @param {ContextResolver} contextResolver
+ *   The context resolver used to lookup context models associated with
+ *   commands.
+ *
+ * @constructor
  */
-module.exports = function(dispatcher, editorContext) {
+module.exports = function(dispatcher, contextResolver) {
   this._dispatcher = dispatcher;
-  this._editorContext = editorContext;
+  this._contextResolver = contextResolver;
 };
 
 _.extend(module.exports.prototype, {
@@ -29,6 +32,8 @@ _.extend(module.exports.prototype, {
    *   The id of the context the new item will be inserted into.
    * @param {string} type
    *   The type to insert. This is optional.
+   *
+   * @return {void}
    */
   insert: function(targetContextId, type) {
     var options = {
@@ -53,6 +58,8 @@ _.extend(module.exports.prototype, {
    * @param {object} edits
    *   A map of inline edits to be preserved. See WidgetModel for the format of
    *   inline edits.
+   *
+   * @return {void}
    */
   edit: function(targetContextId, itemId, edits) {
     this._execute('EDIT_ITEM', {
@@ -73,6 +80,8 @@ _.extend(module.exports.prototype, {
    * @param {object} edits
    *   A map of inline edits to be preserved. See WidgetModel for the format of
    *   inline edits.
+   *
+   * @return {void}
    */
   render: function(targetContextId, itemId, edits) {
     this._execute('RENDER_ITEM', {
@@ -98,6 +107,8 @@ _.extend(module.exports.prototype, {
    * @param {object} edits
    *   A map of inline edits to be preserved. See WidgetModel for the format of
    *   inline edits.
+   *
+   * @return {void}
    */
   duplicate: function(targetContextId, sourceContextId, itemId, widgetId, edits) {
     this._execute('DUPLICATE_ITEM', {
@@ -117,9 +128,22 @@ _.extend(module.exports.prototype, {
    *   The type of command being performed.
    * @param {object} command
    *   The command data to be passed to the dispatched.
+   *
+   * @return {void}
    */
   _execute: function(type, command) {
-    command.editorContext = this._editorContext;
-    this._dispatcher.dispatch(type, command, this._editorContext.getSettings());
+    var editorContext = this._contextResolver.getEditorContext();
+    command.editorContext = editorContext.toJSON();
+    command.settings = editorContext.get('settings');
+
+    if (command.edits) {
+      command.editableContexts = {};
+      _.each(command.edits, function(value, contextId) {
+        var context = this._contextResolver.get(contextId);
+        command.editableContexts[contextId] = context.toJSON();
+      }, this);
+    }
+
+    this._dispatcher.dispatch(type, command, command.editorContext.settings);
   }
 });

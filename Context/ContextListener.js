@@ -10,6 +10,8 @@ var _ = require('underscore'),
 
 /**
  * Listens to a group of context's edit buffers.
+ *
+ * @constructor
  */
 module.exports = function() {
 };
@@ -21,6 +23,9 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {Context} context
    *   The context to listen to.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   addContext: function(context) {
     this.listenTo(context.editBuffer, 'add', this._triggerEvents);
@@ -32,6 +37,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {EditBufferItemModel} bufferItemModel
    *   The model that the event is being triggered for.
+   *
+   * @return {void}
    */
   _triggerEvents: function(bufferItemModel) {
     if (bufferItemModel.get('insert')) {
@@ -43,6 +50,11 @@ _.extend(module.exports.prototype, Backbone.Events, {
     }
   },
 
+  /**
+   * Cleans up after the object when it is ready to be destroyed.
+   *
+   * @return {void}
+   */
   cleanup: function() {
     this.stopListening();
   }

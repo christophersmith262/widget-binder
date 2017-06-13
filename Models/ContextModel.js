@@ -9,18 +9,30 @@ var Backbone = require('backbone'),
   EditBufferItemCollection = require('../Collections/EditBufferItemCollection');
 
 /**
+ * Backbone Model for representing editor widget contexts.
+ *
+ * A context is an environment where widgets can appear. Contexts let us know
+ * who owns the data it's associated with. Each editable region will get its
+ * own context. When a widget travels from one context to another it flags that
+ * the data entity that is associated with the widget needs to be updated.
+ *
+ * @constructor
+ *
+ * @augments Backbone.Model
  */
 module.exports = Backbone.Model.extend({
 
   type: 'Context',
 
   defaults: {
+    ownerId: '',
+    fieldId: '',
     schemaId: '',
     settings: {},
   },
 
   /**
-   * {@inheritdoc}
+   * @inheritdoc
    */
   constructor: function(attributes, options) {
     this.editBuffer = new EditBufferItemCollection([], { contextId: attributes.id });
@@ -28,6 +40,7 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
+   * @inheritdoc
    */
   set: function(attributes, options) {
     if (attributes.editBufferItems) {
@@ -51,12 +64,13 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
-   */
-  getSettings: function() {
-    return this.get('settings');
-  },
-
-  /**
+   * A convenience function for reading an individual setting.
+   *
+   * @param {string} key
+   *   The settings key to lookup.
+   *
+   * @return {mixed}
+   *   The setting value that was read or undefined if no such setting existed.
    */
   getSetting: function(key) {
     return this.get('settings')[key];

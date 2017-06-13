@@ -18,7 +18,6 @@ const ContextModelMock = Backbone.Model.extend({
   }
 });
 
-ContextCollection.__set__('EditBufferItemCollection', EditBufferItemCollectionMock)
 ContextCollection.__set__('ContextModel', ContextModelMock)
 
 describe('ContextCollection module', () => {

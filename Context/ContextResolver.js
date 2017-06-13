@@ -8,6 +8,18 @@
 var _ = require('underscore');
 
 /**
+ * A class for resolving the assicuated context(s) for an element.
+ *
+ * @param {ConextCollection} contextCollection
+ *   The contextCollection to use to lookup contexts.
+ * @param {string} sourceContextAttribute
+ *   The source context attribute name.
+ * @param {string} targetContextAttribute
+ *   The target context attribute name.
+ * @param {Context} editorContext
+ *   The root context of the editor instance.
+ *
+ * @constructor
  */
 module.exports = function(contextCollection, sourceContextAttribute, targetContextAttribute, editorContext) {
   this._contextCollection = contextCollection;
@@ -19,6 +31,13 @@ module.exports = function(contextCollection, sourceContextAttribute, targetConte
 _.extend(module.exports.prototype, {
 
   /**
+   * Resolves the context of an element based on its position in the editor.
+   *
+   * @param {jQuery} $el
+   *   The element to resolve the context of.
+   *
+   * @return {Backbone.Model}
+   *   The context model associated with the element.
    */
   resolveTargetContext: function ($el) {
     var contextId = $el.attr(this._targetContextAttribute);
@@ -30,6 +49,13 @@ _.extend(module.exports.prototype, {
   },
 
   /**
+   * Resolves the context an element has been tagged with.
+   *
+   * @param {jQuery} $el
+   *   The element to resolve the context of.
+   *
+   * @return {Backbone.Model}
+   *   The context model associated with the element.
    */
   resolveSourceContext: function($el) {
     var contextId = $el.attr(this._sourceContextAttribute);
@@ -37,16 +63,27 @@ _.extend(module.exports.prototype, {
   },
 
   /**
+   * Gets the root editor context.
+   *
+   * @return {Backbone.Model}
+   *   The root editor context.
    */
   getEditorContext: function() {
     return this._editorContext;
   },
 
   /**
+   * Gets a context based on its context id.
+   *
+   * @param {string} contextId
+   *   The id of the context to get.
+   *
+   * @return {Backbone.Model}
+   *   The context model.
    */
   get: function(contextId) {
     if (contextId) {
-      var settings = this._editorContext ? this._editorContext.getSettings() : {};
+      var settings = this._editorContext ? this._editorContext.get('settings') : {};
       return this._contextCollection.get(contextId, settings);
     }
     else {
@@ -55,9 +92,15 @@ _.extend(module.exports.prototype, {
   },
 
   /**
+   * Ensures that a context exists in the collection.
+   *
+   * @param {string} contextId
+   *   The context id to ensure exists.
+   *
+   * @return {void}
    */
   touch: function(contextId) {
-    return this._contextCollection.touch(contextId);
+    this._contextCollection.touch(contextId);
   },
 
 });

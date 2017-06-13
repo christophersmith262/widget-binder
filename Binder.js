@@ -1,8 +1,60 @@
+'use strict';
+
 var _ = require('underscore'),
   Backbone = require('backbone'),
-  $ = require('jquery'),
   WidgetModel = require('./Models/WidgetModel');
 
+/**
+ * Represents a binder instance.
+ *
+ * Each binder instance should be associated with exactly one editor instance.
+ *
+ * This object should not be created directly. To create binders:
+ *
+ * @code
+ * require('widget-binder').open($editorElement);
+ * @endcode
+ *
+ * The binder couples all the objects needed to track widget data and perform
+ * downstream synchronization from the server.
+ *
+ * Widget Lifecycle:
+ *
+ *   Create:
+ *     When a widget is created it should call the 'bind' method on the binder
+ *     to instruct the binder to start tracking the widget. This binds the
+ *     editor widget to a server side data model and renders the widget using
+ *     that model. It also attaches actions to the widget that users may
+ *     perform, and sets up inline editing.
+ *
+ *   Edit:
+ *     When an edit action is requested, the sync protocol requests that the
+ *     server allow the user to edit widget's associated data entity model. If
+ *     the markup changes, the widget is re-rendered and existing inline edits
+ *     are preserved.
+ *
+ *   Duplicate:
+ *     Since each widget is bound to a unique data entity on the server,
+ *     operations like copy and paste, or moving a widget to a different part
+ *     of the document may result in the widget's associated data entity being
+ *     duplicated on the server. If this occurs, the widget will be re-rendered
+ *     with its new references, again preserving inline edits.
+ *
+ *   Export:
+ *     When the content author is finished editing, the editor perform cleanup
+ *     on the markup. As a part of this "cleanup", the client calls the 'save'
+ *     method to generate the "export markup", which is what will get sent to
+ *     the server.
+ *
+ *   Destroy:
+ *     When a widget is destroyed in the editor, the client calls the 'destroy'
+ *     method to unbind and free all references to the widget.
+ *
+ * @param {Backbone.View} editorView
+ *   The view that will be used to keep the editor root element in sync.
+ *
+ * @constructor
+ */
 module.exports = function(editorView) {
   this._editorView = editorView;
   this._widgetFactory = editorView.model.widgetFactory;
@@ -10,7 +62,7 @@ module.exports = function(editorView) {
   this._widgetStore = editorView.model.widgetStore;
   this._editBufferMediator = editorView.model.editBufferMediator;
   this._contextResolver = editorView.model.contextResolver;
-}
+};
 
 _.extend(module.exports.prototype, Backbone.Events, {
 
@@ -21,6 +73,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   The element that the new widget will be inserted into.
    * @param {string} type
    *   The type of the item to request. This parameter is optional.
+   *
+   * @return {void}
    */
   create: function($targetEl, type) {
     this._editBufferMediator.requestBufferItem(type, $targetEl);
@@ -44,6 +98,9 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   editor.
    * @param {jQuery} $targetEl
    *   The root element of the widget within the editor.
+   *
+   * @return {WidgetModel}
+   *   The bound model.
    */
   bind: function(widget, id, $targetEl) {
     // Create a model for representing the widget.
@@ -57,7 +114,22 @@ _.extend(module.exports.prototype, Backbone.Events, {
     // Add the widget to the widget to the table to keep track of it.
     this._widgetStore.add(widgetModel, widgetEditorView);
 
+    // Attach event handling.
     this.trigger('bind', this, widgetModel, widgetEditorView);
+
+    this.listenTo(widgetModel, 'change', function() {
+      if (widgetModel.hasState(WidgetModel.State.DESTROYED_REFS)) {
+        this.trigger('unbind', this, widgetModel, widgetEditorView);
+        this.stopListening(widgetModel);
+      }
+      if (widgetModel.hasState(WidgetModel.State.DESTROYED_WIDGET)) {
+        this.trigger('destroy', this, widgetModel, widgetEditorView);
+      }
+    }, this);
+
+    this.listenTo(widgetModel, 'save', function() {
+      this.trigger('save', this, widgetModel, widgetEditorView);
+    }, this);
 
     // If the widget is not currently using the editor view mode, we treat
     // it as being in 'export' form. This means we have to create an export
@@ -82,12 +154,21 @@ _.extend(module.exports.prototype, Backbone.Events, {
     else {
       widgetEditorView.render();
     }
+
+    return widgetModel;
   },
 
   /**
+   * Unbinds (stops trakcing) a widget without destroying the widget itself.
+   *
+   * @param {mixed} id
+   *   The id of the widget to be unbound.
+   *
+   * @return {WidgetModel}
+   *   The saved model or undefined if no such model was found.
    */
   unbind: function(id) {
-    this._applyToModel(id, function(widgetModel) {
+    return this._applyToModel(id, function(widgetModel) {
       this._widgetStore.remove(widgetModel, true);
     });
   },
@@ -101,8 +182,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
    * @return {WidgetModel}
    *   A widget model if the id existed in the store, or undefined otherwise.
    */
-  get: function(id, options) {
-    return this._widgetStore.get(id, { raw: true }).model;
+  get: function(id) {
+    return this._widgetStore.get(id, true).model;
   },
 
   /**
@@ -114,9 +195,12 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {mixed} id
    *   The id of the model to generate an edit request for.
+   *
+   * @return {WidgetModel}
+   *   The saved model or undefined if no such model was found.
    */
   edit: function(id) {
-    this._applyToModel(id, function(widgetModel) {
+    return this._applyToModel(id, function(widgetModel) {
       widgetModel.edit();
     });
   },
@@ -136,10 +220,11 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   The element to save the outputed data format to.
    *
    * @return {WidgetModel}
-   *   The saved model.
+   *   The saved model or undefined if no such model was found.
    */
   save: function(id, $targetEl) {
     return this._applyToModel(id, function(widgetModel) {
+      widgetModel.trigger('save');
       this._viewFactory.createTemporary(widgetModel, $targetEl, 'editor').save();
       this._viewFactory.createTemporary(widgetModel, $targetEl, 'export').render().save();
     });
@@ -154,6 +239,9 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   Set to true if the widget has already been destroyed in the editor.
    *   Setting this to false will result in the destruction of the widget within
    *   the editor.
+   *
+   * @return {WidgetModel}
+   *   The destroyed model.
    */
   destroy: function(id, widgetDestroyed) {
     this._applyToModel(id, function(widgetModel) {
@@ -166,6 +254,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
 
   /**
    * Cleans up after the widget manager object.
+   *
+   * @return {void}
    */
   close: function() {
     this._editorView.model.destroy();
@@ -175,18 +265,66 @@ _.extend(module.exports.prototype, Backbone.Events, {
   },
 
   /**
+   * Gets the settings for this binder instance.
+   *
+   * The settings are linked to the root (editor) context.
+   *
+   * @return {object}
+   *   The settings object for the root context.
    */
   getSettings: function() {
-    return this._contextResolver.getEditorContext().getSettings();
+    return this._contextResolver.getEditorContext().get('settings');
   },
 
   /**
+   * Sets the settings for this binder instance.
+   *
+   * The settings are linked to the root (editor) context.
+   *
+   * @param {object} settings
+   *   The settings object to write. Note that this will overwrite the *entire*
+   *   existing settings object.
+   *
+   * @return {void}
+   */
+  setSettings: function(settings) {
+    this._contextResolver.getEditorContext().set({ settings: settings });
+  },
+
+  /**
+   * Gets an individual setting by name.
+   *
+   * The settings are linked to the root (editor) context.
+   *
+   * @param {string} name
+   *   The name of the setting to lookup.
+   *
+   * @return {mixed}
+   *   The setting value or undefined if no value was found.
    */
   getSetting: function(name) {
     return this._contextResolver.getEditorContext().getSetting(name);
   },
 
   /**
+   * Resolves the context for an element.
+   *
+   * @param {jQuery} $el
+   *   The element to resolve the context of.
+   * @param {string} type
+   *   The type of resolution to perform. The options are:
+   *    - 'target': Resolves the conext at the elements position in the editor.
+   *      This is usually the context you are looking for, and is the default
+   *      if no type is explicitly provided.
+   *    - 'source': Resolves the context the element has been tagged with.
+   *      The source context may be different than the target context if, for
+   *      example, the widget was recently copied from one context and pasted
+   *      into another. The widget binder automatically resolves these
+   *      situations in the background, so there should rarely be a situation
+   *      where client code needs the source context.
+   *
+   * @return {Backbone.Model}
+   *   The context model associated with the element.
    */
   resolveContext: function($el, type) {
     if (!type) {

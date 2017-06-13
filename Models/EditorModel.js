@@ -10,7 +10,7 @@ module.exports = Backbone.Model.extend({
   type: 'Editor',
 
   /**
-   * {@inheritdoc}
+   * @inheritdoc
    */
   initialize: function(attributes, config) {
     this.widgetFactory = config.widgetFactory;
@@ -23,15 +23,24 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
+   * @inheritdoc
    */
-  _updateContextId: function(contextModel) {
-    this.set({ id: contextModel.get('id') });
-  },
-
   destroy: function() {
     this.stopListening();
     this.widgetStore.cleanup();
     this.editBufferMediator.cleanup();
+  },
+
+  /**
+   * Change handler for a context id change.
+   *
+   * @param {Backbone.Model} contextModel
+   *   The context model that has had an id change.
+   *
+   * @return {void}
+   */
+  _updateContextId: function(contextModel) {
+    this.set({ id: contextModel.get('id') });
   }
 
 });

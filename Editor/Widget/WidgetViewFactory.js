@@ -14,6 +14,8 @@ var _ = require('underscore');
  *   The element factory that will be injected into created views.
  * @param {EditorAdapter} adapter
  *   The editor adapter that will be injected into created views.
+ *
+ * @constructor
  */
 module.exports = function(elementFactory, adapter) {
   this._elementFactory = elementFactory;

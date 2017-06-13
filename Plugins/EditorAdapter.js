@@ -6,16 +6,21 @@
 'use strict';
 
 var _ = require('underscore'),
-  Backbone = require('backbone');
+  Backbone = require('backbone'),
+  unimplemented = require('../unimplemented');
 
 /**
- * Marks a method as an interface stub.
- */
-function unimplemented() {
-  throw new Error('Unimplemented method.');
-}
-
-/**
+ * A base for editor adapter plugins.
+ *
+ * Adapter plugins are the glue that translates data mutations within the
+ * widget binder library into a specific editor's API calls. As long as an
+ * editor uses the DOM as the primary method of storage, the widget binder
+ * library can handle most of the mutations without editor specific code. Each
+ * editor may have its own flavor of DOM wrappers and inline editing handling,
+ * so this plugin is required to bridge the gap between the editor's API and
+ * the data operations.
+ *
+ * @constructor
  */
 module.exports = function() {
 };
@@ -30,9 +35,11 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {Element} embedCode
    *   The embed code element to be inserted.
+   *
+   * @return {void}
    */
   insertEmbedCode: function(embedCode) {
-    unimplemented();
+    unimplemented(embedCode);
   },
 
   /**
@@ -43,9 +50,11 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * @param {int} id
    *   The id of the widget to be destroyed.
+   *
+   * @return {void}
    */
   destroyWidget: function(id) {
-    unimplemented();
+    unimplemented(id);
   },
 
   /**
@@ -67,9 +76,11 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   A jQuery style selector for specifying which element within the widget
    *   should become editable. The selector is relative to the view's root el
    *   property.
+   *
+   * @return {void}
    */
   attachInlineEditing: function(widgetView, contextId, selector) {
-    unimplemented();
+    unimplemented(widgetView, contextId, selector);
   },
 
   /**
@@ -89,7 +100,7 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *   The processed inline edit markup for the specified contextId.
    */
   getInlineEdit: function(widgetView, contextId, selector) {
-    return unimplemented();
+    return unimplemented(widgetView, contextId, selector);
   },
 
   /**
@@ -109,6 +120,8 @@ _.extend(module.exports.prototype, Backbone.Events, {
    *
    * This will be called when the widget tracker has been destroyed. It is
    * usually not necessary to implement this method.
+   *
+   * @return {void}
    */
   cleanup: function() {
     this.stopListening();

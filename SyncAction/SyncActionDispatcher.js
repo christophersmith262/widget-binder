@@ -36,6 +36,8 @@ var _ = require('underscore');
  *   A protocol plugin for handling the request / response transaction.
  * @param {SyncActionResolver} resolver
  *   The resolver service for processing sync action responses.
+ *
+ * @constructor
  */
 module.exports = function(protocol, resolver) {
   this._protocol = protocol;
@@ -52,11 +54,11 @@ _.extend(module.exports.prototype, {
    *   'DUPLICATE_ITEM', 'FETCH_SCHEMA'.
    * @param {object} data
    *   Arbitrary data representing the request.
-   * @param {object} settings
-   *   Context-specific settings to be sent with the request.
+   *
+   * @return {void}
    */
-  dispatch: function(type, data, settings) {
-    this._protocol.send(type, data, settings, this._resolver);
+  dispatch: function(type, data) {
+    this._protocol.send(type, data, this._resolver);
   }
 
 });

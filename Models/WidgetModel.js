@@ -84,7 +84,7 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
-   * {@inheritdoc}
+   * @inheritdoc
    */
   constructor: function (attributes, options) {
     this.widget = options.widget;
@@ -94,7 +94,7 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
-   * {@inheritdoc}
+   * @inheritdoc
    */
   set: function(attributes, options) {
     this._filterAttributes(attributes);
@@ -103,6 +103,9 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Triggers a request to edit the referenced edit buffer item.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   edit: function() {
     this.editBufferItemRef.edit(this.get('edits'));
@@ -111,6 +114,9 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Triggers a request to duplicate the referenced edit buffer item.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   duplicate: function() {
     this.set({ duplicating: true });
@@ -119,7 +125,7 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
-   * Triggers a chain of events to delete / clean up after this widget.
+   * @inheritdoc
    */
   destroy: function(options) {
     // If the widget has not already been marked as destroyed we trigger a
@@ -130,10 +136,17 @@ module.exports = Backbone.Model.extend({
       this.trigger('destroy', this, this.collection, options);
       this.setState(State.DESTROYED);
     }
+    return this;
   },
 
   /**
    * Updates the destruction state for this widget.
+   *
+   * @param {WidgetModel.State} state
+   *   The state to set on the widget model.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   setState: function(state) {
     return this.set({state: this.get('state') | state});
@@ -141,12 +154,24 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Checks the destruction state for this widget.
+   *
+   * @param {WidgetModel.State} state
+   *   The state to check for.
+   *
+   * @return {bool}
+   *   True of the model has the provided state set, false otherwise.
    */
   hasState: function(state) {
     return (this.get('state') & state) === state;
   },
 
   /**
+   * Applies attribute filtering for 'set' method calls.
+   *
+   * @param {object} attributes
+   *   The attributes that need to be filtered.
+   *
+   * @return {void}
    */
   _filterAttributes: function(attributes) {
     // Run the change handler to rebuild any references to external models
@@ -160,6 +185,13 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Internal function to handle changes to the referenced edit buffer item.
+   *
+   * @param {object} attributes
+   *   An attributes object to parse for changes that could have side-effects.
+   *
+   * @return {bool}
+   *   True if the changes in the attributes object signaled that this model
+   *   needs to start listening to new objects, false otherwise.
    */
   _refreshEditBufferItemRef: function(attributes) {
     // Track whether we need to update which referenced models we are
@@ -190,6 +222,13 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Removes any stale listeners and sets up fresh listeners.
+   *
+   * @param {object} attributes
+   *   An attributes object to use to determine which related models need to be
+   *   listened to.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   _setupListeners: function(attributes) {
     this.stopListening()
@@ -201,10 +240,17 @@ module.exports = Backbone.Model.extend({
       var context = this._contextResolver.get(contextString);
       this.listenTo(context, 'change:id', this._updateContext);
     }, this);
+
+    return this;
   },
 
   /**
    * Internal function to copy updates from the referenced buffer item.
+   *
+   * @param {Backbone.Model} bufferItemModel
+   *   The buffer item model to copy markup changes from.
+   *
+   * @return {void}
    */
   _readFromBufferItem: function(bufferItemModel) {
     this.set({markup: bufferItemModel.get('markup')});
@@ -212,6 +258,11 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Internal function to handle when a referenced context id has changed.
+   *
+   * @param {Backbone.Model} contextModel
+   *   The context model that has had an id attribute changed.
+   *
+   * @return {void}
    */
   _updateContext: function(contextModel) {
     var oldId = contextModel.previous('id');

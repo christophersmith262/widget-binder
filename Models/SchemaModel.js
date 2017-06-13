@@ -32,6 +32,13 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
+   * Determines if a type is allowed within a schema.
+   *
+   * @param {string} type
+   *   The type to test validity for.
+   *
+   * @return {bool}
+   *   True if the type is allowed within the schema node, false otherwise.
    */
   isAllowed: function(type) {
     return !!this.get('allowed')[type];

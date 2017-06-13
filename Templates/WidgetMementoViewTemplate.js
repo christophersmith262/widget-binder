@@ -4,6 +4,7 @@
 var _ = require('underscore');
 
 /**
+ * @inheritdoc
  */
 module.exports = function(elementFactory, fields, edits) {
   var result = '';

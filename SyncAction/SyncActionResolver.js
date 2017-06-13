@@ -12,6 +12,8 @@ var _ = require('underscore');
  * The resolver service is set up with a mappings of models-to-collections and
  * uses this mapping to update the associated collection when it sees a model
  * that has been mapped.
+ *
+ * @constructor
  */
 module.exports = function() {
   this._collections = {};
@@ -34,6 +36,8 @@ _.extend(module.exports.prototype, {
    *   the callback function will be called with the model attributes in the
    *   response and should return the resolved collection. The model will be
    *   added to the resolved collection in this case.
+   *
+   * @return {void}
    */
   addCollection: function(modelName, collectionCallback) {
     this._collections[modelName] = collectionCallback;
@@ -57,6 +61,8 @@ _.extend(module.exports.prototype, {
    *      attributes: '',
    *    },
    *   ]
+   *
+   * @return {void}
    */
   resolve: function(response) {
     _.each(response, function(model) {
@@ -69,11 +75,13 @@ _.extend(module.exports.prototype, {
   /**
    * Adds models to a collection.
    *
-   * @param {object} models
+   * @param {object} model
    *   An object where keys are model ids and values are model attributes.
    * @param {mixed} collection
    *   Can either be a Backbone.Collection to add the model to, or a callback
    *   which returns the collection.
+   *
+   * @return {void}
    */
   _updateModel: function(model, collection) {
     var resolvedCollection = collection;
