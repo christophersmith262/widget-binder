@@ -144,6 +144,6 @@ _.extend(module.exports.prototype, {
       }, this);
     }
 
-    this._dispatcher.dispatch(type, command, command.editorContext.settings);
+    this._dispatcher.dispatch(type, command);
   }
 });

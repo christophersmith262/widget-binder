@@ -5,9 +5,10 @@ const rewire = require('rewire')
 const expect = require('chai').expect
 const ElementFactory = rewire('../../../Element/ElementFactory')
 
-const ElementMock = function(tag, attributesMap, data) {
+const ElementMock = function(tag, attributesMap, selector, data) {
   this.tag = tag;
   this.attributesMap = attributesMap;
+  this.selector = selector;
   this.data = data;
 }
 ElementFactory.__set__('Element', ElementMock);
@@ -15,6 +16,7 @@ ElementFactory.__set__('Element', ElementMock);
 const elements = {
   widget: {
     tag: 'span',
+    selector: 'selector1',
     attributes: {
       'data-uuid': '<uuid>',
       'data-context-hint': '<context>',
@@ -23,6 +25,7 @@ const elements = {
   },
   field: {
     tag: 'div',
+    selector: 'selector2',
     attributes: {
       'data-field-name': '<field>',
       'data-context': '<context>',
@@ -68,9 +71,11 @@ describe('ElementFactory module', () => {
       expect(widgetElement).to.be.an.instanceof(ElementMock);
       expect(widgetElement.tag).to.eql(elements.widget.tag);
       expect(widgetElement.attributesMap).to.eql(elements.widget.attributes);
+      expect(widgetElement.selector).to.eql(elements.widget.selector);
       expect(widgetElement.data).to.eql(widgetData);
       expect(fieldElement.tag).to.eql(elements.field.tag);
       expect(fieldElement.attributesMap).to.eql(elements.field.attributes);
+      expect(fieldElement.selector).to.eql(elements.field.selector);
       expect(fieldElement.data).to.eql(fieldData);
       expect(fieldElement).to.be.an.instanceof(ElementMock);
       expect(elementFactory.create.bind(elementFactory)).to.throw(Error);

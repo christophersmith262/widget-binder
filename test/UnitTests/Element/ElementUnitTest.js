@@ -28,7 +28,7 @@ describe('Element module', () => {
         "data-uuid": "<uuid>",
         "data-context": "<context>",
         "class": "class1 class2"
-      }, {
+      }, '.selector', {
         "uuid": 'test1',
         "context": "test2",
       });
@@ -57,9 +57,14 @@ describe('Element module', () => {
         "data-uuid": "<uuid>",
         "data-context": "<context>",
         "class": "class1 class2"
-      }, {
+      }, '.selector', {
         "uuid": 'test1',
         "context": "test2",
+      });
+      expect(element.getAttributes()).to.eql({
+        "data-uuid": 'test1',
+        "data-context": 'test2',
+        "class": "class1 class2",
       });
       element.setAttribute('class', 'test');
       element.setAttribute('<uuid>', 'test3');

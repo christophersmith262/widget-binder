@@ -157,6 +157,8 @@ describe('WidgetStore module', () => {
         model: null,
         view: null
       })
+
+      widgetStore.remove();
     });
   });
   describe('"count"', () => {
