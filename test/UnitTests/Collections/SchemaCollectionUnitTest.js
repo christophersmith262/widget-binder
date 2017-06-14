@@ -55,17 +55,25 @@ describe('SchemaCollection module', () => {
       })
       var contextModelMock = new ContextModelMock({
         id: 'context1',
-        field: 'fieldname',
+        schemaId: 'field1',
       })
       schemaCollection.addContextSchema(contextModelMock)
-      assert(mockDispatcher.dispatch.withArgs('FETCH_SCHEMA', {}, 'fieldname').calledOnce)
+      assert(mockDispatcher.dispatch.notCalled, 'Fetch schema request on existing schema')
       mockDispatcher.dispatch.reset()
 
       contextModelMock = new ContextModelMock({
         id: 'context2',
+        schemaId: 'field2',
       })
       schemaCollection.addContextSchema(contextModelMock)
-      assert(mockDispatcher.dispatch.notCalled)
+      assert(mockDispatcher.dispatch.withArgs('FETCH_SCHEMA', 'field2').calledOnce, 'Fetch schema not called on non-existing schema')
+      mockDispatcher.dispatch.reset()
+
+      contextModelMock = new ContextModelMock({
+        id: 'context3',
+      })
+      schemaCollection.addContextSchema(contextModelMock)
+      assert(mockDispatcher.dispatch.notCalled, 'Fetch schema called on undefined schema')
       mockDispatcher.dispatch.reset()
     });
   });

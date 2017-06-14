@@ -105,7 +105,7 @@ _.extend(module.exports.prototype, Backbone.Events, {
     }
 
     return {
-      model: widgetModel,
+      model: widgetModel ? widgetModel : null,
       view: null
     };
   },

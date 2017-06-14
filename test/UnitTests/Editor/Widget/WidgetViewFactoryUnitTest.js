@@ -51,11 +51,15 @@ describe('WidgetViewFactory module', () => {
       var widgetViewFactory = new WidgetViewFactory(elementFactory, adapter);
       widgetViewFactory.register('view1', {
         prototype: WidgetViewMock,
-        template: 'mocktemplate1',
+        options: {
+          template: 'mocktemplate1',
+        }
       })
       widgetViewFactory.register('view2', {
         prototype: WidgetViewMock2,
-        template: 'mocktemplate2',
+        options: {
+          template: 'mocktemplate2',
+        }
       })
       var $el1 = new jQueryMock('div');
       var $el2 = new jQueryMock('span');
@@ -96,7 +100,9 @@ describe('WidgetViewFactory module', () => {
       var widgetViewFactory = new WidgetViewFactory(elementFactory, adapter);
       widgetViewFactory.register('view1', {
         prototype: WidgetViewMock,
-        template: 'mocktemplate1',
+        options: {
+          template: 'mocktemplate1',
+        }
       })
       var $el = new jQueryMock('div');
       var view = widgetViewFactory.createTemporary(widgetModelMock, $el, 'view1')

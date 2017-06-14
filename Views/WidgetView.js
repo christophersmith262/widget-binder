@@ -7,7 +7,7 @@
 
 var Backbone = require('backbone'),
   $ = Backbone.$,
-  unimplemented = require('unimplemented');
+  unimplemented = require('../unimplemented');
 
 /**
  * Backbone view for representing widgets within the editor.

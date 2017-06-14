@@ -96,12 +96,4 @@ describe('EditBufferMediator module', () => {
       })
     })
   })
-  describe('"cleanup"', () => {
-    it('should allow clients to destroy the object', function() {
-      var editBufferMediator = createEditBufferMediator()
-      editBufferMediator.stopListening = sinon.spy()
-      editBufferMediator.cleanup()
-      assert(editBufferMediator.stopListening.calledOnce, 'listeners were not cleaned up')
-    })
-  })
 })

@@ -7,7 +7,7 @@
 
 var _ = require('underscore'),
   Backbone = require('backbone'),
-  unimplemented = require('unimplemented');
+  unimplemented = require('../unimplemented');
 
 /**
  * A base for protocol plugins.
