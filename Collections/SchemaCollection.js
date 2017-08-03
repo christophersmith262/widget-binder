@@ -68,6 +68,9 @@ module.exports = Backbone.Collection.extend({
     var id = contextModel.get('schemaId');
     if (id) {
       if (!this.get(id)) {
+        // Create a placeholder to prevent concurrent requests for the same
+        // schema, then dispatch the schema request.
+        this.add({ id: id });
         this._dispatcher.dispatch('FETCH_SCHEMA', id);
       }
     }
