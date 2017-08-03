@@ -19,6 +19,11 @@ var Backbone = require('backbone'),
 module.exports = Backbone.View.extend({
 
   /**
+   * An attribute for storing internal context data about a widget.
+   */
+  _dataAttribute: 'data-widget-binder-internal',
+
+  /**
    * @inheritdoc
    */
   initialize: function(options) {
@@ -83,6 +88,13 @@ module.exports = Backbone.View.extend({
       var edits = {};
       this._inlineElementVisitor(function($el, contextString, selector) {
         edits[contextString] = this._adapter.getInlineEdit(this, contextString, selector);
+
+        // Restore context data stored in the widget markup if it exists.
+        var data = $el.attr(this._dataAttribute);
+        if (data) {
+          data = JSON.parse(data);
+          this._contextResolver.get(data.id).set(data);
+        }
       });
       this.model.set({edits: edits}, {silent: true});
     }

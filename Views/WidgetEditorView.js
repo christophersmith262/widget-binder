@@ -201,7 +201,7 @@ module.exports = WidgetView.extend({
     this._find(this.inlineEditorSelector, $oldContainer).attr(this.inlineContextAttribute, '');
 
     this._inlineElementVisitor(function($el, contextString, selector) {
-      this._adapter.attachInlineEditing(this, contextString, selector);
+      this._attachInlineEditing($el, contextString, selector);
 
       if (domEdits[contextString]) {
         $el.html('').append(domEdits[contextString]);
@@ -232,7 +232,7 @@ module.exports = WidgetView.extend({
         $el.html(edits[contextString] ? edits[contextString] : '');
       }
 
-      this._adapter.attachInlineEditing(this, contextString, selector);
+      this._attachInlineEditing($el, contextString, selector);
     });
 
     return this._renderAttributes()._renderCommands();
@@ -355,5 +355,28 @@ module.exports = WidgetView.extend({
 
     return this;
   },
+
+  /**
+   * Wrapper for enabling inline editing on an element.
+   *
+   * @param {jQuery} $el
+   *   The element to become inline editable.
+   * @param {string} contextString
+   *   The editable context id the element is associated with.
+   * @param {string} selector
+   *   The jQuery selector for the element.
+   */
+  _attachInlineEditing: function($el, contextString, selector) {
+    // Store data about the editing context directly in the DOM. This allows
+    // other editor instances to map edits when an edit buffer item is
+    // duplicated. Specifically, storing this information in the DOM means
+    // duplication requests can happen across browser tabs, or even across
+    // browser environments in general.
+    var context = this._contextResolver.get(contextString);
+    $el.attr(this._dataAttribute, JSON.stringify(context.toJSON()));
+
+    // Apply the editor-specific inline editing implementation.
+    this._adapter.attachInlineEditing(this, contextString, selector);
+  }
 
 });
