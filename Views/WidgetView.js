@@ -36,6 +36,7 @@ module.exports = Backbone.View.extend({
 
     this._adapter = options.adapter;
     this._elementFactory = options.elementFactory;
+    this._contextResolver = options.contextResolver;
     this.template = options.template;
 
     // Get a list of templates that will be used.

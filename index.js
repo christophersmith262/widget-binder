@@ -177,7 +177,7 @@ _.extend(module.exports.prototype, {
         }
 
         // Create a view factory for generating widget views.
-        var viewFactory = this._createService('WidgetViewFactory', this._elementFactory, adapter);
+        var viewFactory = this._createService('WidgetViewFactory', contextResolver, this._elementFactory, adapter);
         for (var type in this._globalSettings.views) {
           viewFactory.register(type, this._globalSettings.views[type]);
         }

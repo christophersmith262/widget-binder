@@ -10,6 +10,8 @@ var _ = require('underscore');
 /**
  * Creates a WidgetViewFactory object.
  *
+ * @param {ContextResolver} contextResolver
+ *   The context resolver that will be injected into created views.
  * @param {ElementFactory} elementFactory
  *   The element factory that will be injected into created views.
  * @param {EditorAdapter} adapter
@@ -17,7 +19,8 @@ var _ = require('underscore');
  *
  * @constructor
  */
-module.exports = function(elementFactory, adapter) {
+module.exports = function(contextResolver, elementFactory, adapter) {
+  this._contextResolver = contextResolver;
   this._elementFactory = elementFactory;
   this._adapter = adapter;
   this._viewModes = [];
@@ -85,6 +88,7 @@ _.extend(module.exports.prototype, {
       model: widgetModel,
       adapter: this._adapter,
       elementFactory: this._elementFactory,
+      contextResolver: this._contextResolver,
       el: $el.get(0),
     }, options));
   },
