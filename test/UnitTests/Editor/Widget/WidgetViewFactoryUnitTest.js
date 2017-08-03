@@ -29,13 +29,14 @@ const jQueryMock = function(marker) {
   }
 }
 
+var contextResolver = 'mockcontextresolver';
 var elementFactory = 'mockelementfactory';
 var adapter = 'mockadapter';
 
 describe('WidgetViewFactory module', () => {
   describe('"register"', () => {
     it('should allow clients to register new views', function() {
-      var widgetViewFactory = new WidgetViewFactory(elementFactory, adapter);
+      var widgetViewFactory = new WidgetViewFactory(contextResolver, elementFactory, adapter);
       expect(widgetViewFactory.register.bind(widgetViewFactory, 'invalid1')).to.throw(Error);
       expect(widgetViewFactory.register.bind(widgetViewFactory, 'invalid2', {
         template: function() {}
@@ -48,7 +49,7 @@ describe('WidgetViewFactory module', () => {
   });
   describe('"create"', () => {
     it('should allow clients to create view instances', function() {
-      var widgetViewFactory = new WidgetViewFactory(elementFactory, adapter);
+      var widgetViewFactory = new WidgetViewFactory(contextResolver, elementFactory, adapter);
       widgetViewFactory.register('view1', {
         prototype: WidgetViewMock,
         options: {
@@ -68,6 +69,7 @@ describe('WidgetViewFactory module', () => {
       expect(view1.options).to.eql({
         model: widgetModelMock,
         adapter: 'mockadapter',
+        contextResolver: 'mockcontextresolver',
         elementFactory: 'mockelementfactory',
         el: 'div',
         template: 'mocktemplate1',
@@ -76,6 +78,7 @@ describe('WidgetViewFactory module', () => {
       expect(view2.options).to.eql({
         model: widgetModelMock,
         adapter: 'mockadapter',
+        contextResolver: 'mockcontextresolver',
         elementFactory: 'mockelementfactory',
         el: 'span',
         template: 'mocktemplate2',
@@ -87,6 +90,7 @@ describe('WidgetViewFactory module', () => {
       expect(view3.options).to.eql({
         model: widgetModelMock,
         adapter: 'mockadapter',
+        contextResolver: 'mockcontextresolver',
         elementFactory: 'mockelementfactory',
         el: 'div',
         template: 'mocktemplate1',
@@ -97,7 +101,7 @@ describe('WidgetViewFactory module', () => {
   });
   describe('"createTemporary"', () => {
     it('should allow clients to create view instances without any listeners', function() {
-      var widgetViewFactory = new WidgetViewFactory(elementFactory, adapter);
+      var widgetViewFactory = new WidgetViewFactory(contextResolver, elementFactory, adapter);
       widgetViewFactory.register('view1', {
         prototype: WidgetViewMock,
         options: {
