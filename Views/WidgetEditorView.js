@@ -291,7 +291,7 @@ module.exports = WidgetView.extend({
       this.render('container');
     }
     else if (this.model.hasChanged('itemId') || this.model.hasChanged('contextId')) {
-      this._render('attributes');
+      this.render('attributes');
     }
 
     return this;
