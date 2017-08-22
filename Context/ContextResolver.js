@@ -53,13 +53,19 @@ _.extend(module.exports.prototype, {
    *
    * @param {jQuery} $el
    *   The element to resolve the context of.
+   * @param {Context} defaultContext
+   *   The fallback context. If this is ommitted the editor context will be
+   *   used.
    *
    * @return {Backbone.Model}
    *   The context model associated with the element.
    */
-  resolveSourceContext: function($el) {
+  resolveSourceContext: function($el, defaultContext) {
+    if (!defaultContext) {
+      defaultContext = this._editorContext;
+    }
     var contextId = $el.attr(this._sourceContextAttribute);
-    return contextId ? this.get(contextId) : this._editorContext;
+    return contextId ? this.get(contextId) : defaultContext;
   },
 
   /**

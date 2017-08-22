@@ -365,6 +365,9 @@ module.exports = WidgetView.extend({
    *   The editable context id the element is associated with.
    * @param {string} selector
    *   The jQuery selector for the element.
+   *
+   * @return {this}
+   *   The this object for call-chaining.
    */
   _attachInlineEditing: function($el, contextString, selector) {
     // Store data about the editing context directly in the DOM. This allows
@@ -377,6 +380,8 @@ module.exports = WidgetView.extend({
 
     // Apply the editor-specific inline editing implementation.
     this._adapter.attachInlineEditing(this, contextString, selector);
+
+    return this;
   }
 
 });

@@ -50,8 +50,8 @@ _.extend(module.exports.prototype, {
    *   The newly created widget model.
    */
   create: function(widget, id, $el) {
-    var sourceContext = this._contextResolver.resolveSourceContext($el);
     var targetContext = this._contextResolver.resolveTargetContext($el);
+    var sourceContext = this._contextResolver.resolveSourceContext($el, targetContext);
 
     var options = {
       editBufferItemRefFactory: this._editBufferItemRefFactory,
